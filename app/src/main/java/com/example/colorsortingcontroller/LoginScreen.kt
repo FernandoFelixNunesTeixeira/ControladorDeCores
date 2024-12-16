@@ -48,7 +48,7 @@ lateinit var executor: Executor
 private lateinit var biometricPrompt: BiometricPrompt
 private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
-class MainActivity2 : FragmentActivity() {
+class LoginScreen : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         executor = ContextCompat.getMainExecutor(this)
@@ -72,7 +72,7 @@ class MainActivity2 : FragmentActivity() {
                         Toast.LENGTH_SHORT).show()
 
                     // Fecha a tela de login e segue para a tela principal
-                    val intent = Intent(this@MainActivity2, MainActivity::class.java)
+                    val intent = Intent(this@LoginScreen, MainActivity::class.java)
                     startActivity(intent)
                     finish()
 
