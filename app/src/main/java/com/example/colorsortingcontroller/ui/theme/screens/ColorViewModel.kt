@@ -100,10 +100,4 @@ class ColorViewModel: ViewModel() {
             }
         }
     }
-
-
-
-
-
-
 }
