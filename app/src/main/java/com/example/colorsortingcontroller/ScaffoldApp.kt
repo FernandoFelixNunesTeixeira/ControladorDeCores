@@ -106,7 +106,7 @@ fun DrawerItem(icon: ImageVector, label: String, onClick: () -> Unit) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(end = 16.dp)
             )
             Text(
