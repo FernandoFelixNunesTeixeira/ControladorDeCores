@@ -18,8 +18,8 @@ fun MonitoramentoScreen() {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface, // Cor de fundo
-                    contentColor = MaterialTheme.colorScheme.onSurface // Cor do conteúdo
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
             ) {
@@ -32,8 +32,8 @@ fun MonitoramentoScreen() {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface, // Cor de fundo
-                    contentColor = MaterialTheme.colorScheme.onSurface // Cor do conteúdo
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
             ) {

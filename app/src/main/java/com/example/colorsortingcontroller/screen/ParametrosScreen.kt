@@ -1,10 +1,12 @@
 package com.example.colorsortingcontroller.screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -12,34 +14,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
+import kotlinx.coroutines.launch
 
-// Tela de Parâmetros
 @Composable
-fun ParametrosScreen() {
-    // Definir os valores iniciais para os ângulos
-    var posicaoServoPortaMin by remember { mutableIntStateOf(90) }
-    var posicaoServoPortaMax by remember { mutableIntStateOf(0) }
+fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
-    var posicaoServoDirecionadorEDMin by remember { mutableIntStateOf(72) }
-    var posicaoServoDirecionadorEDMax by remember { mutableIntStateOf(105) }
+    val parametros by viewModel.parametros.collectAsState(initial = null)
 
-    var posicaoServoDirecionador12Min by remember { mutableIntStateOf(70) }
-    var posicaoServoDirecionador12Max by remember { mutableIntStateOf(100) }
+    val coroutineScope = rememberCoroutineScope()
 
-    var posicaoServoDirecionador34Min by remember { mutableIntStateOf(80) }
-    var posicaoServoDirecionador34Max by remember { mutableIntStateOf(115) }
+    var posicaoServoPortaMin by remember { mutableStateOf(parametros?.posicaoServoPortaMin ?: 90) }
+    var posicaoServoPortaMax by remember { mutableStateOf(parametros?.posicaoServoPortaMax ?: 0) }
 
-    // Valores iniciais para RGB
-    var rValue by remember { mutableIntStateOf(255) }
-    var gValue by remember { mutableIntStateOf(255) }
-    var bValue by remember { mutableIntStateOf(255) }
+    var posicaoServoDirecionadorEDMin by remember { mutableStateOf(parametros?.posicaoServoDirecionadorEDMin ?: 72) }
+    var posicaoServoDirecionadorEDMax by remember { mutableStateOf(parametros?.posicaoServoDirecionadorEDMax ?: 105) }
+
+    var posicaoServoDirecionador12Min by remember { mutableStateOf(parametros?.posicaoServoDirecionador12Min ?: 70) }
+    var posicaoServoDirecionador12Max by remember { mutableStateOf(parametros?.posicaoServoDirecionador12Max ?: 100) }
+
+    var posicaoServoDirecionador34Min by remember { mutableStateOf(parametros?.posicaoServoDirecionador34Min ?: 80) }
+    var posicaoServoDirecionador34Max by remember { mutableStateOf(parametros?.posicaoServoDirecionador34Max ?: 115) }
+
+    var rValue by remember { mutableStateOf(parametros?.rValue ?: 255) }
+    var gValue by remember { mutableStateOf(parametros?.gValue ?: 255) }
+    var bValue by remember { mutableStateOf(parametros?.bValue ?: 255) }
 
     ColorSortingControllerTheme {
         Column(
             modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Bloco PosicaoServoPorta
             AngleCard(
                 label = "Posição Servo Porta",
                 posicaoMin = posicaoServoPortaMin,
@@ -47,15 +51,14 @@ fun ParametrosScreen() {
                 onMinChange = { posicaoServoPortaMin = it },
                 onMaxChange = { posicaoServoPortaMax = it }
             )
-            // Bloco PosicaoServoDirecionadorED
             AngleCard(
                 label = "Posição Servo Direcionador ED",
                 posicaoMin = posicaoServoDirecionadorEDMin,
                 posicaoMax = posicaoServoDirecionadorEDMax,
                 onMinChange = { posicaoServoDirecionadorEDMin = it },
                 onMaxChange = { posicaoServoDirecionadorEDMax = it }
+
             )
-            // Bloco PosicaoServoDirecionador12
             AngleCard(
                 label = "Posição Servo Direcionador 12",
                 posicaoMin = posicaoServoDirecionador12Min,
@@ -63,7 +66,6 @@ fun ParametrosScreen() {
                 onMinChange = { posicaoServoDirecionador12Min = it },
                 onMaxChange = { posicaoServoDirecionador12Max = it }
             )
-            // Bloco PosicaoServoDirecionador34
             AngleCard(
                 label = "Posição Servo Direcionador 34",
                 posicaoMin = posicaoServoDirecionador34Min,
@@ -83,10 +85,26 @@ fun ParametrosScreen() {
 
             Button(
                 onClick = {
-                    /* Enviar parametros
-                    *  Insira todas as variáveis
-                    *  para serem enviadas ao microcontrolador */
+                    // Utilização da coroutine para fins assíncronos
+                    coroutineScope.launch {
+                        viewModel.update(
+                            posicaoServoPortaMin,
+                            posicaoServoPortaMax,
+                            posicaoServoDirecionadorEDMin,
+                            posicaoServoDirecionadorEDMax,
+                            posicaoServoDirecionador12Min,
+                            posicaoServoDirecionador12Max,
+                            posicaoServoDirecionador34Min,
+                            posicaoServoDirecionador34Max,
+                            rValue,
+                            gValue,
+                            bValue
+                        )
+                    }
+
+                    viewModel.logAllParametros()
                 },
+
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(text = "Enviar")
@@ -172,7 +190,7 @@ fun RGBCard(
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Selecione uma cor:") },
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                        colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.onSurface,
                             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
                             focusedLabelColor = MaterialTheme.colorScheme.onSurface,
