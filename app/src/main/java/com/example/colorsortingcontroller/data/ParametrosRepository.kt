@@ -1,11 +1,46 @@
 package com.example.colorsortingcontroller.data
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 
 class ParametrosRepository(private val parametrosSource: ParametrosLocalSource) {
 
     val allParametros: Flow<List<Parametros>> = parametrosSource.getAllParametros()
+
+
+    //Inserir parametros no banco de dados
+    suspend fun insertParametros(
+        posicaoServoPortaMin: Int,
+        posicaoServoPortaMax: Int,
+        posicaoServoDirecionadorEDMin: Int,
+        posicaoServoDirecionadorEDMax: Int,
+        posicaoServoDirecionador12Min: Int,
+        posicaoServoDirecionador12Max: Int,
+        posicaoServoDirecionador34Min: Int,
+        posicaoServoDirecionador34Max: Int,
+        cor: String,
+        rValue: Int,
+        gValue: Int,
+        bValue: Int
+    ){ parametrosSource.insert(
+            posicaoServoPortaMin,
+            posicaoServoPortaMax,
+            posicaoServoDirecionadorEDMin,
+            posicaoServoDirecionadorEDMax,
+            posicaoServoDirecionador12Min,
+            posicaoServoDirecionador12Max,
+            posicaoServoDirecionador34Min,
+            posicaoServoDirecionador34Max,
+            cor,
+            rValue,
+            gValue,
+            bValue
+        )
+    }
+
+    suspend fun deleteParametros(id: Int){
+        parametrosSource.delete(id)
+    }
+
 
     // Cor RGB
     suspend fun updateRGBValues(rValue: Int, gValue: Int, bValue: Int) {
@@ -17,6 +52,12 @@ class ParametrosRepository(private val parametrosSource: ParametrosLocalSource) 
         )
         parametrosSource.updateBValue(
             bValue = bValue
+        )
+    }
+
+    suspend fun updateCor(cor: String){
+        parametrosSource.updateCor(
+            cor = cor
         )
     }
 

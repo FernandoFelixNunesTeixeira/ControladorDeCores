@@ -29,6 +29,9 @@ data class Parametros (
     @ColumnInfo(name = "posicaoServoDirecionador34Max")
     val posicaoServoDirecionador34Max: Int,
 
+    @ColumnInfo(name = "cor")
+    val cor: String,
+
     @ColumnInfo(name = "rValue")
     val rValue: Int,
     @ColumnInfo(name = "gValue")

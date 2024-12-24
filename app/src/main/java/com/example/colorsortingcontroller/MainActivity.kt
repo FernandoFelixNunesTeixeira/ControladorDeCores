@@ -5,12 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.colorsortingcontroller.data.AppDatabase
-import com.example.colorsortingcontroller.data.Parametros
 import com.example.colorsortingcontroller.data.ParametrosDao
 import com.example.colorsortingcontroller.data.ParametrosLocalSource
 import com.example.colorsortingcontroller.data.ParametrosRepository
@@ -19,6 +22,7 @@ import com.example.colorsortingcontroller.screen.EstatisticasViewModel
 import com.example.colorsortingcontroller.screen.MonitoramentoViewModel
 import com.example.colorsortingcontroller.screen.ParametrosViewModel
 import com.example.colorsortingcontroller.screen.ParametrosViewModelFactory
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,16 +40,17 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-
                 val parametrosViewModel: ParametrosViewModel = remember {
                     ViewModelProvider(
                         this,
                         ParametrosViewModelFactory(parametrosRepository)
-                    ).get(ParametrosViewModel::class.java)
-                }
+                ).get(ParametrosViewModel::class.java)
+            }
 
                 val monitoramentoViewModel: MonitoramentoViewModel = viewModel()
                 val estatisticasViewModel: EstatisticasViewModel = viewModel()
+
+                val parametrosList by parametrosViewModel.allParametros.collectAsState(initial = emptyList())
 
                 AppNavigation(
                     monitoramentoViewModel = monitoramentoViewModel,

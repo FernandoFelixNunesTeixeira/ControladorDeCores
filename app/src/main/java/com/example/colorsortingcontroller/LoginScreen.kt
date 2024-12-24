@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -126,9 +127,9 @@ fun ScaffoldLogin() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                var text by remember { mutableStateOf("") }
-                var password by remember { mutableStateOf("") }
-                var passwordVisibility by remember { mutableStateOf(false) }
+                var text by rememberSaveable { mutableStateOf("") }
+                var password by rememberSaveable { mutableStateOf("") }
+                var passwordVisibility by rememberSaveable { mutableStateOf(false) }
 
                 val icon = if (passwordVisibility)
                     painterResource(id = R.drawable.design_icon_visibility)

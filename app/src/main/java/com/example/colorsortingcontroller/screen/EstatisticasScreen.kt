@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import androidx.compose.ui.unit.dp
+import com.example.colorsortingcontroller.screen.graphs.Lineas
 
 // Tela de Estatísticas
 @Composable
@@ -43,6 +44,12 @@ fun EstatisticasScreen() {
                     Text(text = "Peças separadas por coletor: ")
                 }
             }
+            //Por enquanto só dá para por um por vez
+
+            Lineas()
+            //Pastel()
+
+            // MascotaStatsScreen()
         }
     }
 }

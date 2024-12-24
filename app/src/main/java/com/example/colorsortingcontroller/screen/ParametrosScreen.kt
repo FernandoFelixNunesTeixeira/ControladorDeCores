@@ -4,61 +4,107 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import com.example.colorsortingcontroller.network.MQTTHandler
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @Composable
 fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
     val parametros by viewModel.parametros.collectAsState(initial = null)
-
+    val uiState by viewModel.state2.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    var posicaoServoPortaMin by remember { mutableStateOf(parametros?.posicaoServoPortaMin ?: 90) }
-    var posicaoServoPortaMax by remember { mutableStateOf(parametros?.posicaoServoPortaMax ?: 0) }
+    // Banco de Dados
+    val parametrosList by viewModel.allParametros.collectAsState(initial = emptyList())
 
-    var posicaoServoDirecionadorEDMin by remember { mutableStateOf(parametros?.posicaoServoDirecionadorEDMin ?: 72) }
-    var posicaoServoDirecionadorEDMax by remember { mutableStateOf(parametros?.posicaoServoDirecionadorEDMax ?: 105) }
+    val bdPosicaoServoPortaMin = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoPortaMin else 0
+    val bdPosicaoServoPortaMax = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoPortaMax else 0
+    val bdPosicaoServoDirecionadorEDMin = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionadorEDMin else 0
+    val bdPosicaoServoDirecionadorEDMax = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionadorEDMax else 0
+    val bdPosicaoServoDirecionador12Min = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador12Min else 0
+    val bdPosicaoServoDirecionador12Max = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador12Max else 0
+    val bdPosicaoServoDirecionador34Min = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador34Min else 0
+    val bdPosicaoServoDirecionador34Max = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador34Max else 0
+    val bdCor = if (parametrosList.isNotEmpty()) parametrosList[0].cor else 0
 
-    var posicaoServoDirecionador12Min by remember { mutableStateOf(parametros?.posicaoServoDirecionador12Min ?: 70) }
-    var posicaoServoDirecionador12Max by remember { mutableStateOf(parametros?.posicaoServoDirecionador12Max ?: 100) }
+    val bdRValue = if (parametrosList.isNotEmpty()) parametrosList[0].rValue else 0
+    val bdGValue = if (parametrosList.isNotEmpty()) parametrosList[0].gValue else 0
+    val bdBValue = if (parametrosList.isNotEmpty()) parametrosList[0].bValue else 0
 
-    var posicaoServoDirecionador34Min by remember { mutableStateOf(parametros?.posicaoServoDirecionador34Min ?: 80) }
-    var posicaoServoDirecionador34Max by remember { mutableStateOf(parametros?.posicaoServoDirecionador34Max ?: 115) }
+    // Variáveis para INPUT
 
-    var rValue by remember { mutableStateOf(parametros?.rValue ?: 255) }
-    var gValue by remember { mutableStateOf(parametros?.gValue ?: 255) }
-    var bValue by remember { mutableStateOf(parametros?.bValue ?: 255) }
+    var posicaoServoPortaMin by remember { mutableStateOf(uiState.posicaoServoPortaMin) }
+    var posicaoServoPortaMax by remember { mutableStateOf(uiState.posicaoServoPortaMax) }
+
+    var posicaoServoDirecionadorEDMin by remember { mutableStateOf(uiState.posicaoServoDirecionadorEDMin) }
+    var posicaoServoDirecionadorEDMax by remember { mutableStateOf(uiState.posicaoServoDirecionadorEDMax) }
+
+    var posicaoServoDirecionador12Min by remember { mutableStateOf(uiState.posicaoServoDirecionador12Min) }
+    var posicaoServoDirecionador12Max by remember { mutableStateOf(uiState.posicaoServoDirecionadorEDMax) }
+
+    var posicaoServoDirecionador34Min by remember { mutableStateOf(uiState.posicaoServoDirecionador34Min) }
+    var posicaoServoDirecionador34Max by remember { mutableStateOf(uiState.posicaoServoDirecionador34Max) }
+
+    var cor by remember { mutableStateOf(uiState.cor) }
+
+    var rValue by remember { mutableStateOf(uiState.rValue) }
+    var gValue by remember { mutableStateOf(uiState.gValue) }
+    var bValue by remember { mutableStateOf(uiState.bValue) }
+
+    val scrollState = rememberScrollState()
 
     ColorSortingControllerTheme {
         Column(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier
+                .padding(10.dp)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // Exibe os valores da uiState
+            Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
+            Text("UI State - Posição Servo Direcionador ED Min: ${uiState.posicaoServoDirecionadorEDMin}, Max: ${uiState.posicaoServoDirecionadorEDMax}")
+            Text("UI State - Posição Servo Direcionador 12 Min: ${uiState.posicaoServoDirecionador12Min}, Max: ${uiState.posicaoServoDirecionador12Max}")
+            Text("UI State - Posição Servo Direcionador 34 Min: ${uiState.posicaoServoDirecionador34Min}, Max: ${uiState.posicaoServoDirecionador34Max}")
+            Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
+
+            // Exibe o valor atual antes dos cards
+            Text("Posição Servo Porta - Min: $bdPosicaoServoPortaMin Max: $bdPosicaoServoPortaMax")
             AngleCard(
                 label = "Posição Servo Porta",
                 posicaoMin = posicaoServoPortaMin,
                 posicaoMax = posicaoServoPortaMax,
-                onMinChange = { posicaoServoPortaMin = it },
-                onMaxChange = { posicaoServoPortaMax = it }
+                onMinChange = { posicaoServoPortaMin = it},
+                onMaxChange = { posicaoServoPortaMax = it}
             )
+
+            // Exibe o valor atual antes dos cards
+            Text("Posição Servo Direcionador ED - Min: $bdPosicaoServoDirecionadorEDMin Max: $bdPosicaoServoDirecionadorEDMax")
             AngleCard(
                 label = "Posição Servo Direcionador ED",
                 posicaoMin = posicaoServoDirecionadorEDMin,
                 posicaoMax = posicaoServoDirecionadorEDMax,
                 onMinChange = { posicaoServoDirecionadorEDMin = it },
                 onMaxChange = { posicaoServoDirecionadorEDMax = it }
-
             )
+
+            // Exibe o valor atual antes dos cards
+            Text("Posição Servo Direcionador 12 - Min: $bdPosicaoServoDirecionador12Min Max: $bdPosicaoServoDirecionador12Max")
             AngleCard(
                 label = "Posição Servo Direcionador 12",
                 posicaoMin = posicaoServoDirecionador12Min,
@@ -66,6 +112,9 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                 onMinChange = { posicaoServoDirecionador12Min = it },
                 onMaxChange = { posicaoServoDirecionador12Max = it }
             )
+
+            // Exibe o valor atual antes dos cards
+            Text("Posição Servo Direcionador 34 - Min: $bdPosicaoServoDirecionador34Min Max: $bdPosicaoServoDirecionador34Max")
             AngleCard(
                 label = "Posição Servo Direcionador 34",
                 posicaoMin = posicaoServoDirecionador34Min,
@@ -73,38 +122,60 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                 onMinChange = { posicaoServoDirecionador34Min = it },
                 onMaxChange = { posicaoServoDirecionador34Max = it }
             )
+
+            // Exibe os valores RGB antes do card
+            Text("RGB Valores - Cor: $bdCor -> R: $bdRValue, G: $bdGValue, B: $bdBValue")
             RGBCard(
                 label = "RGB Valores",
                 R = rValue,
                 G = gValue,
                 B = bValue,
+                cor = cor,
                 onRChange = { rValue = it },
                 onGChange = { gValue = it },
-                onBChange = { bValue = it }
+                onBChange = { bValue = it },
+                onCorChange = { cor = it }
             )
 
             Button(
                 onClick = {
-                    // Utilização da coroutine para fins assíncronos
                     coroutineScope.launch {
-                        viewModel.update(
-                            posicaoServoPortaMin,
-                            posicaoServoPortaMax,
-                            posicaoServoDirecionadorEDMin,
-                            posicaoServoDirecionadorEDMax,
-                            posicaoServoDirecionador12Min,
-                            posicaoServoDirecionador12Max,
-                            posicaoServoDirecionador34Min,
-                            posicaoServoDirecionador34Max,
-                            rValue,
-                            gValue,
-                            bValue
-                        )
+                        if (parametros == null) {
+                            viewModel.insert(
+                                posicaoServoPortaMin,
+                                posicaoServoPortaMax,
+                                posicaoServoDirecionadorEDMin,
+                                posicaoServoDirecionadorEDMax,
+                                posicaoServoDirecionador12Min,
+                                posicaoServoDirecionador12Max,
+                                posicaoServoDirecionador34Min,
+                                posicaoServoDirecionador34Max,
+                                cor,
+                                rValue,
+                                gValue,
+                                bValue
+                            )
+                        } else {
+                            viewModel.update(
+                                posicaoServoPortaMin,
+                                posicaoServoPortaMax,
+                                posicaoServoDirecionadorEDMin,
+                                posicaoServoDirecionadorEDMax,
+                                posicaoServoDirecionador12Min,
+                                posicaoServoDirecionador12Max,
+                                posicaoServoDirecionador34Min,
+                                posicaoServoDirecionador34Max,
+                                cor,
+                                rValue,
+                                gValue,
+                                bValue
+                            )
+                        }
                     }
 
-                    viewModel.logAllParametros()
+                    viewModel.updateParametrosFromDatabase()
+                    Log.d("ParametrosUpdate", "Novos parâmetros: ${uiState.posicaoServoPortaMin}")
                 },
-
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(text = "Enviar")
@@ -157,9 +228,11 @@ fun RGBCard(
     R: Int,
     G: Int,
     B: Int,
+    cor: String,
     onRChange: (Int) -> Unit,
     onGChange: (Int) -> Unit,
-    onBChange: (Int) -> Unit
+    onBChange: (Int) -> Unit,
+    onCorChange: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedColor by remember { mutableStateOf("Vermelho") }
@@ -207,6 +280,7 @@ fun RGBCard(
                             DropdownMenuItem(
                                 text = { Text(color) },
                                 onClick = {
+                                    onCorChange(color)
                                     selectedColor = color
                                     expanded = false
                                 }

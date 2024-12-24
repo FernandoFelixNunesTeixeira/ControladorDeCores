@@ -1,11 +1,11 @@
 package com.example.colorsortingcontroller.network
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+//import kotlinx.serialization.SerialName
+//import kotlinx.serialization.Serializable
 
 
 
-@Serializable
+/*@Serializable
 data class Peca (
     val id: String,
     @SerialName(value = "Cor1")
@@ -24,5 +24,5 @@ data class Peca (
     val QuantidadeCor3: String,
     @SerialName(value = "Quantidade_Cor4")
     val QuantidadeCor4: String,
-)
+) */
 

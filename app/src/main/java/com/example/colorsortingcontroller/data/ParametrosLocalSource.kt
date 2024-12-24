@@ -1,12 +1,45 @@
 package com.example.colorsortingcontroller.data
 
-import android.util.Log
 import kotlinx.coroutines.flow.Flow
 
 class ParametrosLocalSource(private val parametrosDao: ParametrosDao) {
 
     fun getAllParametros(): Flow<List<Parametros>> {
         return parametrosDao.getAllParametros()
+    }
+
+    suspend fun insert(
+        posicaoServoPortaMin: Int,
+        posicaoServoPortaMax: Int,
+        posicaoServoDirecionadorEDMin: Int,
+        posicaoServoDirecionadorEDMax: Int,
+        posicaoServoDirecionador12Min: Int,
+        posicaoServoDirecionador12Max: Int,
+        posicaoServoDirecionador34Min: Int,
+        posicaoServoDirecionador34Max: Int,
+        cor: String,
+        rValue: Int,
+        gValue: Int,
+        bValue: Int
+    ){
+        parametrosDao.insert(
+            posicaoServoPortaMin,
+            posicaoServoPortaMax,
+            posicaoServoDirecionadorEDMin,
+            posicaoServoDirecionadorEDMax,
+            posicaoServoDirecionador12Min,
+            posicaoServoDirecionador12Max,
+            posicaoServoDirecionador34Min,
+            posicaoServoDirecionador34Max,
+            cor,
+            rValue,
+            gValue,
+            bValue
+        )
+    }
+
+    suspend fun delete(id: Int){
+        parametrosDao.delete(id)
     }
 
     suspend fun updatePosicaoServoPortaMin(posicaoServoPortaMin: Int) {
@@ -57,6 +90,12 @@ class ParametrosLocalSource(private val parametrosDao: ParametrosDao) {
         )
     }
 
+    suspend fun updateCor(cor: String) {
+        parametrosDao.updateCor(
+            newCor = cor
+        )
+    }
+
     suspend fun updateRValue(rValue: Int) {
         parametrosDao.updateRValue(
             newRValue = rValue
@@ -74,5 +113,4 @@ class ParametrosLocalSource(private val parametrosDao: ParametrosDao) {
             newBValue = bValue
         )
     }
-
 }

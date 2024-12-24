@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoGraph
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Menu
@@ -23,7 +22,7 @@ import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldApp(
-    state: ScreenState,
+    state: ScreenState?,
     onScreenChange: (ScreenState) -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -44,7 +43,7 @@ fun ScaffoldApp(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(state.title) },
+                        title = { Text("Aplicativo") },
                         navigationIcon = {
                             IconButton(onClick = {
                                 coroutineScope.launch {

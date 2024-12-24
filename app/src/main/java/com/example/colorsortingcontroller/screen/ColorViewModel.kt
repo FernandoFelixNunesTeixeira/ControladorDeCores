@@ -1,17 +1,17 @@
-package com.example.colorsortingcontroller.ui.theme.screens
+package com.example.colorsortingcontroller.screen
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.colorsortingcontroller.network.ColorApi
+import com.example.colorsortingcontroller.network.MQTTHandler
 import kotlinx.coroutines.launch
 import java.io.IOException
 
 private val BROKER_URL = "ssl://44a41899400a4d2687717200b79f04cb.s1.eu.hivemq.cloud:8883"
 private val CLIENT_ID = "Android_Client"
-private lateinit var mqttHandler: MQTTViewModel
+private lateinit var mqttHandler: MQTTHandler
 
 
 sealed interface ColorUiState {
@@ -67,7 +67,7 @@ class ColorViewModel: ViewModel() {
     fun getConexao() {
         viewModelScope.launch{
             try {
-                mqttHandler = MQTTViewModel()
+                mqttHandler = MQTTHandler()
                 mqttHandler.connect(BROKER_URL , CLIENT_ID )
             } catch(e: IOException) {
                 ColorUiState.Error
