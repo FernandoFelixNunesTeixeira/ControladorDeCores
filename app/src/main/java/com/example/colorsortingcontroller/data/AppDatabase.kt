@@ -6,10 +6,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.CoroutineScope
 
-@Database(entities = [Parametros::class], version = 1, exportSchema = false)
+@Database(entities = [Monitoramento::class, Parametros::class, Estatisticas::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun parametrosDao(): ParametrosDao
+    abstract fun appDao(): AppDao
 
     companion object {
         @Volatile
@@ -25,7 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context,
                     AppDatabase::class.java,
-                    "parametros-db"
+                    "color-sorting-db"
                 ).fallbackToDestructiveMigration()
                     .build()
 

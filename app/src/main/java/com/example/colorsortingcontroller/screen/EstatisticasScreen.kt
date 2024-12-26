@@ -3,14 +3,20 @@ package com.example.colorsortingcontroller.screen
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.colorsortingcontroller.screen.graphs.Lineas
 
 // Tela de Estatísticas
 @Composable
-fun EstatisticasScreen() {
+fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
+
+    val uiState by viewModel.stateEstatisticas.collectAsState()
+
     ColorSortingControllerTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -27,7 +33,9 @@ fun EstatisticasScreen() {
                 Column(
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Text(text = "Peças separadas por cor: ")
+                    Text(text = "Peças separadas por cor: " +
+                            "1: [${uiState.pecasCor1}] 2: [${uiState.pecasCor2}] 3: [${uiState.pecasCor3}] 4: [${uiState.pecasCor4}] " +
+                            "5: [${uiState.pecasCor5}] 6: [${uiState.pecasCor6}] 7: [${uiState.pecasCor7}] 8: [${uiState.pecasCor8}]")
                 }
             }
             Card(
@@ -41,15 +49,14 @@ fun EstatisticasScreen() {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text = "Peças separadas por coletor: ")
+                    Text(text = "Peças separadas por coletor: " +
+                            "1: [${uiState.pecasColetor1}] 2: [${uiState.pecasColetor2}] 3: [${uiState.pecasColetor3}] 4: [${uiState.pecasColetor4}]")
                 }
             }
             //Por enquanto só dá para por um por vez
-
             Lineas()
             //Pastel()
-
-            // MascotaStatsScreen()
+            //MascotaStatsScreen()
         }
     }
 }

@@ -18,16 +18,36 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.colorsortingcontroller.network.MQTTHandler
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
+    //Inicializar de forma mais adeqauda depois
+    //var viewModel2: MQTTHandler = viewModel()
+
 
     val parametros by viewModel.parametros.collectAsState(initial = null)
     val uiState by viewModel.state2.collectAsState()
+    val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "{\n" +
+            "\t\"PosicaoServoPortaAnguloMinimo\" : \"14\",\n" +
+            "\t\"PosicaoServoPortaAnguloMaximo\" : \"89\",\n" +
+            "\t\"PosicaoServoDirecionadorEDAnguloMinimo\" : \"13\",\n" +
+            "\t\"PosicaoServoDirecionadorEDAnguloMaximo\" : \"97\",\n" +
+            "\t\"PosicaoServoDirecionador12AnguloMinimo\" : \"75\",\n" +
+            "\t\"PosicaoServoDirecionador12AnguloMaximo\" : \"82\",\n" +
+            "\t\"PosicaoServoDirecionador34AnguloMinimo\" : \"27\",\n" +
+            "\t\"PosicaoServoDirecionador34AnguloMaximo\" : \"14\",\n" +
+            "\t\"R\" : \"100\",\n" +
+            "\t\"G\" : \"200\",\n" +
+            "\t\"B\" : \"150\",\n" +
+            "\t\"Cor\":\"25\"\n" +
+            "}")
     val coroutineScope = rememberCoroutineScope()
 
     // Banco de Dados
@@ -49,23 +69,23 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
     // Variáveis para INPUT
 
-    var posicaoServoPortaMin by remember { mutableStateOf(uiState.posicaoServoPortaMin) }
-    var posicaoServoPortaMax by remember { mutableStateOf(uiState.posicaoServoPortaMax) }
+    var posicaoServoPortaMin by rememberSaveable { mutableStateOf(uiState.posicaoServoPortaMin) }
+    var posicaoServoPortaMax by rememberSaveable { mutableStateOf(uiState.posicaoServoPortaMax) }
 
-    var posicaoServoDirecionadorEDMin by remember { mutableStateOf(uiState.posicaoServoDirecionadorEDMin) }
-    var posicaoServoDirecionadorEDMax by remember { mutableStateOf(uiState.posicaoServoDirecionadorEDMax) }
+    var posicaoServoDirecionadorEDMin by rememberSaveable { mutableStateOf(uiState.posicaoServoDirecionadorEDMin) }
+    var posicaoServoDirecionadorEDMax by rememberSaveable { mutableStateOf(uiState.posicaoServoDirecionadorEDMax) }
 
-    var posicaoServoDirecionador12Min by remember { mutableStateOf(uiState.posicaoServoDirecionador12Min) }
-    var posicaoServoDirecionador12Max by remember { mutableStateOf(uiState.posicaoServoDirecionadorEDMax) }
+    var posicaoServoDirecionador12Min by rememberSaveable { mutableStateOf(uiState.posicaoServoDirecionador12Min) }
+    var posicaoServoDirecionador12Max by rememberSaveable { mutableStateOf(uiState.posicaoServoDirecionadorEDMax) }
 
-    var posicaoServoDirecionador34Min by remember { mutableStateOf(uiState.posicaoServoDirecionador34Min) }
-    var posicaoServoDirecionador34Max by remember { mutableStateOf(uiState.posicaoServoDirecionador34Max) }
+    var posicaoServoDirecionador34Min by rememberSaveable { mutableStateOf(uiState.posicaoServoDirecionador34Min) }
+    var posicaoServoDirecionador34Max by rememberSaveable { mutableStateOf(uiState.posicaoServoDirecionador34Max) }
 
-    var cor by remember { mutableStateOf(uiState.cor) }
+    var cor by rememberSaveable { mutableStateOf(uiState.cor) }
 
-    var rValue by remember { mutableStateOf(uiState.rValue) }
-    var gValue by remember { mutableStateOf(uiState.gValue) }
-    var bValue by remember { mutableStateOf(uiState.bValue) }
+    var rValue by rememberSaveable { mutableStateOf(uiState.rValue) }
+    var gValue by rememberSaveable { mutableStateOf(uiState.gValue) }
+    var bValue by rememberSaveable { mutableStateOf(uiState.bValue) }
 
     val scrollState = rememberScrollState()
 
@@ -76,13 +96,14 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+        ///    viewModel.ReceberAtualizar()
             // Exibe os valores da uiState
             Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
             Text("UI State - Posição Servo Direcionador ED Min: ${uiState.posicaoServoDirecionadorEDMin}, Max: ${uiState.posicaoServoDirecionadorEDMax}")
             Text("UI State - Posição Servo Direcionador 12 Min: ${uiState.posicaoServoDirecionador12Min}, Max: ${uiState.posicaoServoDirecionador12Max}")
             Text("UI State - Posição Servo Direcionador 34 Min: ${uiState.posicaoServoDirecionador34Min}, Max: ${uiState.posicaoServoDirecionador34Max}")
             Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
-
+            Text("Comunicação UI State -  $mensagemMQTT")
             // Exibe o valor atual antes dos cards
             Text("Posição Servo Porta - Min: $bdPosicaoServoPortaMin Max: $bdPosicaoServoPortaMax")
             AngleCard(
@@ -140,6 +161,8 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             Button(
                 onClick = {
                     coroutineScope.launch {
+                       // viewModel.manipularMensagemMQTT()
+                        viewModel.transformarObjetoJsoneEnviar()
                         if (parametros == null) {
                             viewModel.insert(
                                 posicaoServoPortaMin,

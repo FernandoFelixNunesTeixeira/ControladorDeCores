@@ -3,6 +3,8 @@ package com.example.colorsortingcontroller.screen
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -10,7 +12,10 @@ import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 
 // Tela de Monitoramento
 @Composable
-fun MonitoramentoScreen() {
+fun MonitoramentoScreen(viewModel: MonitoramentoViewModel = viewModel()) {
+
+    val uiState by viewModel.stateMonitoramento.collectAsState()
+
     ColorSortingControllerTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -27,7 +32,7 @@ fun MonitoramentoScreen() {
                 Column(
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Text(text = "Estado: ")
+                    Text(text = "Estado: ${uiState.estado}")
                 }
             }
             Card(
@@ -41,7 +46,7 @@ fun MonitoramentoScreen() {
                 Column(
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Text(text = "Cor: ")
+                    Text(text = "Cor: ${uiState.corAtual}")
                 }
             }
         }

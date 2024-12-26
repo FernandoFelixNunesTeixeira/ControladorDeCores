@@ -1,19 +1,26 @@
 package com.example.colorsortingcontroller
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,66 +49,114 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import java.util.concurrent.Executor
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
+import kotlinx.coroutines.delay
 
 //Passar manipulação de dados para outra classe para seguir padrão viewModel
 lateinit var executor: Executor
 private lateinit var biometricPrompt: BiometricPrompt
 private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
-class LoginScreen : FragmentActivity() {
+interface SensorBiometrico {
+    fun AutenticacaoBiometria()
+}
+
+
+class LoginScreen : FragmentActivity(), SensorBiometrico {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        executor = ContextCompat.getMainExecutor(this)
 
+        setContent {
+            ColorSortingControllerTheme {
+                LoadingScreen()
+            }
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            // Depois de 3 segundos, exibe a tela de login
+            setContent {
+                ColorSortingControllerTheme {
+                    ScaffoldLogin()
+                }
+            }
+        }, 3000)  // Tempo de delay (3 segundos)
+
+        // Inicializa o biometric prompt
+        executor = ContextCompat.getMainExecutor(this)
         biometricPrompt = BiometricPrompt(this, executor,
             object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence){
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-
-                    //Verificar possíveis problemas dentro de função compose
-                    Toast.makeText(applicationContext,"Erro de Autenticação: $errString",
-                        Toast.LENGTH_SHORT).show()
-
+                    Toast.makeText(applicationContext, "Erro de Autenticação: $errString", Toast.LENGTH_SHORT).show()
                 }
 
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult){
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-
-                    //Verificar possíveis problemas dentro de função compose
-                    Toast.makeText(applicationContext,"Autenticação: realizada com sucesso !!!",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "Autenticação: realizada com sucesso !!!", Toast.LENGTH_SHORT).show()
 
                     // Fecha a tela de login e segue para a tela principal
                     val intent = Intent(this@LoginScreen, MainActivity::class.java)
                     startActivity(intent)
                     finish()
-
                 }
-                override fun onAuthenticationFailed(){
+
+                override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    //Verificar possíveis problemas dentro de função compose
-                    //Toast.makeText(applicationContext,"Autenticação falhou",
-                    //Toast.LENGTH_SHORT).show()
-                    //Criar tela de Login
-                    setContent {
-                        ColorSortingControllerTheme {
-                            ScaffoldLogin()
-                        }
-                    }
+                    Toast.makeText(applicationContext, "Falha na autenticação biométrica", Toast.LENGTH_SHORT).show()
                 }
             })
 
-        promptInfo = BiometricPrompt.PromptInfo.Builder( )
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Login Biométrico")
             .setSubtitle("Logue usando sua credencial biométrica")
-          //  .setNegativeButtonText("Usar senha de conta")
             .setConfirmationRequired(false)
             .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
             .build()
+    }
 
-        setContent {
-            ScaffoldLogin()
-        }
+    override fun AutenticacaoBiometria() {
+
+        //withContext(Dispatchers.IO) {
+
+        //   val biometricManager = BiometricManager.from(applicationContext)
+        /*  when(biometricManager.canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)){
+        BiometricManager.BIOMETRIC_SUCCESS ->
+           // biometricPrompt.authenticate(promptInfo)
+            Log.d("Sensor_Biometrico", "O aplicativo pode utilizar autenticação biométrica")
+            //    Snackbar.make(this, "",  )
+         //   biometricPrompt.authenticate(promptInfo)
+
+        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> //{
+            Log.e(
+                "Sensor_Biometrico",
+                "Nenhum recurso biométrico disponível neste dispositivo."
+            )
+           // Toast.makeText(
+           //     applicationContext, "Nenhum recurso biométrico disponível neste dispositivo.",
+          //      Toast.LENGTH_SHORT
+           // ).show()
+      //  }
+        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> //{
+            Log.e(
+                "Sensor_Biometrico",
+                "Os recursos biométricos não estão disponíveis no momento."
+            )
+         //   Toast.makeText(
+          //      applicationContext, "Os recursos biométricos não estão disponíveis no momento.",
+         //       Toast.LENGTH_SHORT
+          //  ).show()
+       // }
+    //    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+      //      val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply{
+      //          putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+     //               BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
+       //     }
+       //     startActivityForResult(enrollIntent, 1)
+       // }
+
+
+
+    } }*/
+        biometricPrompt.authenticate(promptInfo)
     }
 }
 
@@ -130,6 +186,7 @@ fun ScaffoldLogin() {
                 var text by rememberSaveable { mutableStateOf("") }
                 var password by rememberSaveable { mutableStateOf("") }
                 var passwordVisibility by rememberSaveable { mutableStateOf(false) }
+                val chamadaDeFuncao : SensorBiometrico = LoginScreen()
 
                 val icon = if (passwordVisibility)
                     painterResource(id = R.drawable.design_icon_visibility)
@@ -167,9 +224,8 @@ fun ScaffoldLogin() {
                 ) {
                     Text("Entrar")
                 }
-
                 Button(
-                    onClick = { AutenticacaoBiometria() },
+                    onClick = { chamadaDeFuncao.AutenticacaoBiometria() },
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
                     Text("Sensor Biométrico")
@@ -179,6 +235,53 @@ fun ScaffoldLogin() {
     }
 }
 
-fun AutenticacaoBiometria() {
-     biometricPrompt.authenticate(promptInfo)
+@Composable
+fun LoadingScreen() {
+
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        delay(3000)
+        isLoading = false
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        LoginScreen()
+    }
 }
+
+
+//class BateriaScreen : FragmentActivity() {
+
+//@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+// override fun quantidadeBateria()  {
+//  val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
+//      this.registerReceiver(null
+//      , ifilter)
+
+//   }
+
+
+//  batteryPct = batteryStatus?.let { intent ->
+//     val level: Int = BatteryManager.EXTRA_LEVEL.toInt()
+//      val scale: Int = BatteryManager.EXTRA_SCALE.toInt()
+//      level * 100 / scale.toFloat()
+//  }
+//   return batteryPct
+
+//  }
+//}
+
+
+
+
+
+
+

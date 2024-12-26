@@ -1,17 +1,30 @@
 package com.example.colorsortingcontroller.data
 
 import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface ParametrosDao {
+interface AppDao {
 
-    // Update cada motor e cor
+    // Monitoramento
 
+    @Query("INSERT INTO monitoramento (estado, corAtual) VALUES (:estado, :corAtual)")
+    suspend fun insertMonitoramento(estado: String, corAtual: String)
+
+    @Query("UPDATE monitoramento SET estado = :newEstado WHERE id = 1")
+    suspend fun updateEstado(newEstado: String)
+
+    @Query("UPDATE monitoramento SET corAtual = :newCorAtual WHERE id = 1")
+    suspend fun updateCorAtual(newCorAtual: String)
+
+    @Query("DELETE FROM monitoramento WHERE id = :id")
+    suspend fun deleteMonitoramento(id: Int)
+
+    @Query("SELECT * FROM monitoramento WHERE id = 1")
+    fun getAllMonitoramento(): Flow<List<Monitoramento>>
+
+    // Parametros
     @Query("INSERT INTO parametros(" +
             "posicaoServoPortaMin,posicaoServoPortaMax,posicaoServoDirecionadorEDMin,posicaoServoDirecionadorEDMax," +
             "posicaoServoDirecionador12Min,posicaoServoDirecionador12Max,posicaoServoDirecionador34Min," +
@@ -75,8 +88,71 @@ interface ParametrosDao {
     @Query("UPDATE parametros SET bValue = :newBValue WHERE id = 1")
     suspend fun updateBValue(newBValue: Int)
 
-    // Mostrar tudo
     @Query("SELECT * FROM parametros WHERE id = 1")
     fun getAllParametros(): Flow<List<Parametros>>
 
+    // Estatisticas
+
+    @Query("INSERT INTO estatisticas (" +
+            "pecasCor1, pecasCor2, pecasCor3, pecasCor4, pecasCor5, pecasCor6, pecasCor7, pecasCor8, " +
+            "pecasColetor1, pecasColetor2, pecasColetor3, pecasColetor4) " +
+            "VALUES (:pecasCor1, :pecasCor2, :pecasCor3, :pecasCor4, :pecasCor5, :pecasCor6, :pecasCor7, :pecasCor8," +
+            ":pecasColetor1, :pecasColetor2, :pecasColetor3, :pecasColetor4)")
+    suspend fun insertEstatisticas(
+        pecasCor1: Int,
+        pecasCor2: Int,
+        pecasCor3: Int,
+        pecasCor4: Int,
+        pecasCor5: Int,
+        pecasCor6: Int,
+        pecasCor7: Int,
+        pecasCor8: Int,
+
+        pecasColetor1: Int,
+        pecasColetor2: Int,
+        pecasColetor3: Int,
+        pecasColetor4: Int
+    )
+
+    @Query("UPDATE estatisticas SET pecasCor1 = :newPecasCor1 WHERE id = 1")
+    suspend fun updatePecasCor1(newPecasCor1: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor2 = :newPecasCor2 WHERE id = 1")
+    suspend fun updatePecasCor2(newPecasCor2: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor3 = :newPecasCor3 WHERE id = 1")
+    suspend fun updatePecasCor3(newPecasCor3: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor4 = :newPecasCor4 WHERE id = 1")
+    suspend fun updatePecasCor4(newPecasCor4: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor5 = :newPecasCor5 WHERE id = 1")
+    suspend fun updatePecasCor5(newPecasCor5: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor6 = :newPecasCor6 WHERE id = 1")
+    suspend fun updatePecasCor6(newPecasCor6: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor7 = :newPecasCor7 WHERE id = 1")
+    suspend fun updatePecasCor7(newPecasCor7: Int)
+
+    @Query("UPDATE estatisticas SET pecasCor8 = :newPecasCor8 WHERE id = 1")
+    suspend fun updatePecasCor8(newPecasCor8: Int)
+
+    @Query("UPDATE estatisticas SET pecasColetor1 = :newPecasColetor1 WHERE id = 1")
+    suspend fun updatePecasColetor1(newPecasColetor1: Int)
+
+    @Query("UPDATE estatisticas SET pecasColetor2 = :newPecasColetor2 WHERE id = 1")
+    suspend fun updatePecasColetor2(newPecasColetor2: Int)
+
+    @Query("UPDATE estatisticas SET pecasColetor3 = :newPecasColetor3 WHERE id = 1")
+    suspend fun updatePecasColetor3(newPecasColetor3: Int)
+
+    @Query("UPDATE estatisticas SET pecasColetor4 = :newPecasColetor4 WHERE id = 1")
+    suspend fun updatePecasColetor4(newPecasColetor4: Int)
+
+    @Query("DELETE FROM estatisticas WHERE id = :id")
+    suspend fun deleteEstatisticas(id: Int)
+
+    @Query("SELECT * FROM estatisticas WHERE id = 1")
+    fun getAllEstatisticas(): Flow<List<Estatisticas>>
 }

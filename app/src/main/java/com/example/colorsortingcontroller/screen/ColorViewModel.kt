@@ -9,7 +9,7 @@ import com.example.colorsortingcontroller.network.MQTTHandler
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-private val BROKER_URL = "ssl://44a41899400a4d2687717200b79f04cb.s1.eu.hivemq.cloud:8883"
+private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
 private val CLIENT_ID = "Android_Client"
 private lateinit var mqttHandler: MQTTHandler
 

@@ -1,51 +1,25 @@
 package com.example.colorsortingcontroller.screen
 
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.colorsortingcontroller.data.Parametros
-import com.example.colorsortingcontroller.data.ParametrosLocalSource
 import com.example.colorsortingcontroller.data.ParametrosRepository
 import com.example.colorsortingcontroller.network.MQTTHandler
-
-import com.example.colorsortingcontroller.network.MQTTUiState
-import com.example.colorsortingcontroller.network.objetoJsonParametros
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import com.google.gson.Gson
-import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttException
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
-import kotlin.properties.Delegates
 
 
-private val BROKER_URL = "ssl://44a41899400a4d2687717200b79f04cb.s1.eu.hivemq.cloud:8883"
+private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
 private val CLIENT_ID = "Android_Client"
 private lateinit var mqttHandler: MQTTHandler
 //private var ValorNovo by Delegates.notNull<Int>()
@@ -57,9 +31,14 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     init {
         getConexao()
         subscribeToTopic("parametros", 1)
-        obterTopico()
+        subscribeToTopic("parametrosReceber", 1)
+   //     obterTopico()
         //obterJson()
         updateParametrosFromDatabase()
+        manipularMensagemMQTT()
+        //getValor()
+            //ReceberAtualizar()
+
     }
 
 
@@ -67,9 +46,9 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     //val state3: StateFlow<MQTTHandler.Companion> = _mqqtState
     //var a : String? = getObjetoJsonParametros()
 
-    fun obterTopico() {
-
-    }
+   // fun obterTopico() {
+//
+   // }
 
     fun getConexao() {
         viewModelScope.launch{
@@ -86,7 +65,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     fun subscribeToTopic(topic: String, nivelQos: Int){
         viewModelScope.launch{
             try {
-                mqttHandler.subscribe(topic, nivelQos);
+                mqttHandler.subscribe(topic, nivelQos)
 
             } catch(e: IOException) {
                 ColorUiState.Error
@@ -105,8 +84,161 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
         }
     }
 
+
+    fun transformarObjetoJsoneEnviar( ) {
+
+
+        viewModelScope.launch{
+            try {
+                var objetoJsonParametros = "{ "  + "\"" +  "PosicaoServoPortaAnguloMinimo" + "\" :" +
+                        "\"" + state2.value.posicaoServoPortaMin.toString() + "\"" + "," +
+                        "\"" +  "PosicaoServoPortaAnguloMaximo" + "\" :" +
+                        "\"" + state2.value.posicaoServoPortaMax.toString() + "\"" +  "," +
+                        "\"" +  "PosicaoServoDirecionadorEDAnguloMinimo"+ "\" :"  +
+                        "\"" + state2.value.posicaoServoDirecionadorEDMin.toString() + "\"" +  "," +
+                        "\"" + "PosicaoServoDirecionadorEDAnguloMaximo"  + "\" :" +
+                        "\"" + state2.value.posicaoServoDirecionadorEDMax.toString() + "\"" + "," +
+                        "\"" + "PosicaoServoDirecionador12AnguloMinimo"  +  "\" :" +
+                        "\"" + state2.value.posicaoServoDirecionador12Min.toString() + "\"" + "," +
+                        "\"" + "PosicaoServoDirecionador12AnguloMaximo"  + "\" :" +
+                        "\"" + state2.value.posicaoServoDirecionador12Max.toString() + "\"" + "," +
+                        "\"" + "PosicaoServoDirecionador34AnguloMinimo"  +  "\" :" +
+                        "\"" + state2.value.posicaoServoDirecionador34Min.toString() + "\"" + "," +
+                        "\"" + "PosicaoServoDirecionador34AnguloMaximo"  + "\" :" +
+                        "\"" +  state2.value.posicaoServoDirecionador34Max.toString() + "\"" + "," +
+                        "\"" + "Cor"  + "\" :" +
+                        "\"" +  state2.value.cor + "\"" + "," +
+                        "\"" + "R"  + "\" :" +
+                        "\"" +  state2.value.rValue.toString() + "\"" + "," +
+                        "\"" + "G"  + "\" :" +
+                        "\"" +  state2.value.gValue.toString() + "\"" + "," +
+                        "\"" + "B"  + "\" :" +
+                        "\"" +  state2.value.bValue.toString() + "\"" + " }"
+                publishMessage("parametros",  objetoJsonParametros, 1, false )
+
+
+
+            } catch(e: IOException) {
+                ColorUiState.Error
+            }
+        }
+    }
+
     private val _state2 = MutableStateFlow(ParametrosUiState())
     val state2: StateFlow<ParametrosUiState> = _state2
+  //  .stateIn(
+  //      scope = viewModelScope,
+  //      started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+   //     initialValue = ParametrosUiState()
+  //  )
+ //   val conexaoParametrosUiState = mqttHandler.state3.value
+
+    val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateParametros
+
+//
+ //   "PosicaoServoPortaAnguloMinimo" : "14",
+ //   "PosicaoServoPortaAnguloMaximo" : "89",
+ //   "PosicaoServoDirecionadorEDAnguloMinimo" : "13",
+ //   "PosicaoServoDirecionadorEDAnguloMaximo" : "97",
+//    "PosicaoServoDirecionador12AnguloMinimo" : "75",
+//    "PosicaoServoDirecionador12AnguloMaximo" : "82",
+//    "PosicaoServoDirecionador34AnguloMinimo" : "27",
+ //   "PosicaoServoDirecionador34AnguloMaximo" : "14",
+ //   "R" : "100",
+//    "G" : "200",
+//    "B" : "150",
+ //   "Cor":"25"
+
+     fun manipularMensagemMQTT(){
+         viewModelScope.launch {
+             while(true) {
+                 //Instância do objeto GSON
+                 delay(5000)
+                 //val gson = Gson()
+                 //var json : FlowCollector<String>
+
+                 //Conversão da mensagem em MQTT contendo uma string json para um objeto json
+                 if (mqttHandler.mqttStateParametros.value != null) {
+                     val objetoJson =
+                         JsonParser.parseString(mqttHandler.mqttStateParametros.value).asJsonObject
+                     _state2.value = ParametrosUiState(
+                         objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
+                         objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
+                         objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
+                         objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
+                         objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
+                         objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
+                         objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
+                         objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
+                         objetoJson.get("Cor").asString,
+                         objetoJson.get("R").asInt,
+                         objetoJson.get("G").asInt,
+                         objetoJson.get("B").asInt
+                     )
+                     // updateParametrosFromDatabase()
+                     if (parametros == null) {
+                         insert(
+                             objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
+                             objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
+                             objetoJson.get("Cor").asString,
+                             objetoJson.get("R").asInt,
+                             objetoJson.get("G").asInt,
+                             objetoJson.get("B").asInt
+                         )
+                     } else {
+                         update(
+                             objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
+                             objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
+                             objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
+                             objetoJson.get("Cor").asString,
+                             objetoJson.get("R").asInt,
+                             objetoJson.get("G").asInt,
+                             objetoJson.get("B").asInt
+                         )
+                     }
+                 }
+                 //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
+                 println(" Mensagem atual: ${mqttHandler.mqttStateParametros.value}")
+             }
+         }
+
+    }
+//   private val _state4 = MutableStateFlow(MQTTUiState.MensagemRecebida())
+  //  val state4: MutableStateFlow<MQTTUiState.MensagemRecebida> = _state4
+
+
+    //fun getValor() {
+          //  return state4.value.objetoJson
+        //val a = mqttUiState.
+
+   // }
+  //  _state4.value = conexaoParametrosUiState
+//val mqttUiState2 : MQTTUiState = _state4.value
+   //     when(mqttUiState2) {
+
+     //   }
+
+   // fun ReceberAtualizar(){
+
+    //  viewModelScope.launch()
+    //    {
+        //  if(mqttHandler.state3.value.objetoJson != null)}{
+       //   _state4.value = mqttHandler.state3.value
+      //}
+    //   }
+  //  }
+
 
     // Recebe todos os valores do repositório
    val allParametros: Flow<List<Parametros>> = parametrosRepository.allParametros
@@ -205,7 +337,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
-    class ParametrosUiState (
+   data class ParametrosUiState (
         var posicaoServoPortaMin: Int = 0,
         var posicaoServoPortaMax: Int = 0,
         var posicaoServoDirecionadorEDMin: Int = 0,
