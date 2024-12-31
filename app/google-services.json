@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "55360001602",
+    "project_id": "color-sorting-controller",
+    "storage_bucket": "color-sorting-controller.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:55360001602:android:42a195425590662b223fdb",
+        "android_client_info": {
+          "package_name": "com.example.colorsortingcontroller"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfPwm1WvyGdmV0qeOqNEH-34MWYpUUCOQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.colorsortingcontroller.data.Estatisticas
 import com.example.colorsortingcontroller.data.EstatisticasRepository
 import com.example.colorsortingcontroller.data.Monitoramento
 import com.example.colorsortingcontroller.data.MonitoramentoRepository
+
 import com.example.colorsortingcontroller.network.MQTTHandler
+import com.example.colorsortingcontroller.network.MQTTUiState
 import com.example.colorsortingcontroller.screen.MonitoramentoViewModel.MonitoramentoUiState
 import com.example.colorsortingcontroller.screen.ParametrosViewModel.ParametrosUiState
 import com.google.gson.JsonParser
@@ -21,30 +24,38 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-private val BROKER_URL = "ssl://44a41899400a4d2687717200b79f04cb.s1.eu.hivemq.cloud:8883"
-private val CLIENT_ID = "Android_Client2"
+
+private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
+private val CLIENT_ID = "Android_ClientTestando"
 private lateinit var mqttHandler: MQTTHandler
+
 
 class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepository) : ViewModel() {
     private val _state = MutableStateFlow(ScreenState.estatisticas)
     val state: StateFlow<ScreenState> = _state
 
+    //val para impedir mudanças indesejáveis na variável
+    private val valorEstatisticasList : ((List<Estatisticas>) -> Unit)? = null
+
     init {
         getConexao()
+
         subscribeToTopic("estatisticas", 1)
         subscribeToTopic("estatisticasReceber", 1)
-        manipularMensagemMQTT()
+    //    manipularMensagemMQTT()
         //obterTopico()
         //obterJson()
 
         // Apenas para testes iniciais:
-        insertEstatisticas(12, 5, 10, 12, 33, 41,
-            4, 7, 93, 12, 55, 32)
+      //  insertEstatisticas(12, 5, 10, 12, 33, 41,
+       //     4, 7, 93, 12, 55, 32)
 
         updateEstatisticasFromDatabase()
 
 
-        //manipularMensagemMQTT()
+        manipularMensagemMQTT()
+
+
     }
 
     // Recebe todos os valores do repositório
@@ -139,11 +150,13 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     fun getConexao() {
         viewModelScope.launch {
             try {
-                mqttHandler = MQTTHandler()
+
+                mqttHandler = MQTTHandler.getInstance()
                 mqttHandler.connect(BROKER_URL, CLIENT_ID)
 
+
             } catch (e: IOException) {
-                ColorUiState.Error
+                MQTTUiState.Error
             }
         }
     }
@@ -154,7 +167,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                 mqttHandler.subscribe(topic, nivelQos);
 
             } catch (e: IOException) {
-                ColorUiState.Error
+                MQTTUiState.Error
             }
         }
     }
@@ -177,24 +190,95 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         viewModelScope.launch {
             while (true) {
                 //Instância do objeto GSON
-                delay(5000)
+                delay(1)
                 //val gson = Gson()
 
                 //Conversão da mensagem em MQTT contendo uma string json para um objeto json
-                if (mqttHandler.mqttStateEstatisticas.value != null) {
+                synchronized(this) {
+                if (mensagemMQTT.value != null) {
                     val objetoJson =
-                        JsonParser.parseString(mqttHandler.mqttStateEstatisticas.value).asJsonObject
+                        JsonParser.parseString(mensagemMQTT.value).asJsonObject
                     _stateEstatisticas.value = EstatisticasUiState(
-                        objetoJson.get("PecasSeparadasCor").asInt,
-                        objetoJson.get("PecasSeparadasColetor").asInt
+                        objetoJson.get("PecasSeparadasCor1").asInt,
+                        objetoJson.get("PecasSeparadasCor2").asInt,
+                        objetoJson.get("PecasSeparadasCor3").asInt,
+                        objetoJson.get("PecasSeparadasCor4").asInt,
+                        objetoJson.get("PecasSeparadasCor5").asInt,
+                        objetoJson.get("PecasSeparadasCor6").asInt,
+                        objetoJson.get("PecasSeparadasCor7").asInt,
+                        objetoJson.get("PecasSeparadasCor8").asInt,
+                        objetoJson.get("PecasSeparadasColetor1").asInt,
+                        objetoJson.get("PecasSeparadasColetor2").asInt,
+                        objetoJson.get("PecasSeparadasColetor3").asInt,
+                        objetoJson.get("PecasSeparadasColetor4").asInt
                     )
+                    if (valorEstatisticasList != null) {
+                        updateEstatisticas(
+                            _stateEstatisticas.value.pecasCor1,
+                            _stateEstatisticas.value.pecasCor2,
+                            _stateEstatisticas.value.pecasCor3,
+                            _stateEstatisticas.value.pecasCor4,
+                            _stateEstatisticas.value.pecasCor5,
+                            _stateEstatisticas.value.pecasCor6,
+                            _stateEstatisticas.value.pecasCor7,
+                            _stateEstatisticas.value.pecasCor8,
+                            _stateEstatisticas.value.pecasColetor1,
+                            _stateEstatisticas.value.pecasColetor2,
+                            _stateEstatisticas.value.pecasColetor3,
+                            _stateEstatisticas.value.pecasColetor4,
+                        )
+                    } else {
+                        insertEstatisticas(
+                            _stateEstatisticas.value.pecasCor1,
+                            _stateEstatisticas.value.pecasCor2,
+                            _stateEstatisticas.value.pecasCor3,
+                            _stateEstatisticas.value.pecasCor4,
+                            _stateEstatisticas.value.pecasCor5,
+                            _stateEstatisticas.value.pecasCor6,
+                            _stateEstatisticas.value.pecasCor7,
+                            _stateEstatisticas.value.pecasCor8,
+                            _stateEstatisticas.value.pecasColetor1,
+                            _stateEstatisticas.value.pecasColetor2,
+                            _stateEstatisticas.value.pecasColetor3,
+                            _stateEstatisticas.value.pecasColetor4,
+                        )
+                    }
 
+                    updateEstatisticas(
+                        _stateEstatisticas.value.pecasCor1,
+                        _stateEstatisticas.value.pecasCor2,
+                        _stateEstatisticas.value.pecasCor3,
+                        _stateEstatisticas.value.pecasCor4,
+                        _stateEstatisticas.value.pecasCor5,
+                        _stateEstatisticas.value.pecasCor6,
+                        _stateEstatisticas.value.pecasCor7,
+                        _stateEstatisticas.value.pecasCor8,
+                        _stateEstatisticas.value.pecasColetor1,
+                        _stateEstatisticas.value.pecasColetor2,
+                        _stateEstatisticas.value.pecasColetor3,
+                        _stateEstatisticas.value.pecasColetor4,
+                    )
+                }
+                /*    updateEstatisticas(
+                        _stateEstatisticas.value.pecasCor1,
+                        _stateEstatisticas.value.pecasCor2,
+                        _stateEstatisticas.value.pecasCor3,
+                        _stateEstatisticas.value.pecasCor4,
+                        _stateEstatisticas.value.pecasCor5,
+                        _stateEstatisticas.value.pecasCor6,
+                        _stateEstatisticas.value.pecasCor7,
+                        _stateEstatisticas.value.pecasCor8,
+                        _stateEstatisticas.value.pecasColetor1,
+                        _stateEstatisticas.value.pecasColetor2,
+                        _stateEstatisticas.value.pecasColetor3,
+                        _stateEstatisticas.value.pecasColetor4,
+                    ) */
 
                 }
             }
         }
         //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-        println(" Mensagem atual: ${mqttHandler.mqttStateEstatisticas.value}")
+        println(" Mensagem atual: ${mensagemMQTT.value}")
     }
 
     data class EstatisticasUiState(
@@ -235,7 +319,9 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                     )
                     _stateEstatisticas.value = novasEstatisticas
                     Log.d("EstatisticasUpdate", "Novas estatísticas: $novasEstatisticas")
+                    valorEstatisticasList?.invoke(estatisticasList)
                 }
+
             }
         }
     }

@@ -22,6 +22,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.colorsortingcontroller.network.MQTTHandler
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -34,7 +35,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
     val parametros by viewModel.parametros.collectAsState(initial = null)
     val uiState by viewModel.state2.collectAsState()
-    val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "{\n" +
+    val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT"/*"{\n" +
             "\t\"PosicaoServoPortaAnguloMinimo\" : \"14\",\n" +
             "\t\"PosicaoServoPortaAnguloMaximo\" : \"89\",\n" +
             "\t\"PosicaoServoDirecionadorEDAnguloMinimo\" : \"13\",\n" +
@@ -47,7 +48,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             "\t\"G\" : \"200\",\n" +
             "\t\"B\" : \"150\",\n" +
             "\t\"Cor\":\"25\"\n" +
-            "}")
+            "}" */)
     val coroutineScope = rememberCoroutineScope()
 
     // Banco de Dados
@@ -162,7 +163,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                 onClick = {
                     coroutineScope.launch {
                        // viewModel.manipularMensagemMQTT()
-                        viewModel.transformarObjetoJsoneEnviar()
+                      //  viewModel.transformarObjetoJsoneEnviar()
                         if (parametros == null) {
                             viewModel.insert(
                                 posicaoServoPortaMin,
@@ -194,9 +195,15 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                                 bValue
                             )
                         }
+                        viewModel.updateParametrosFromDatabase()
+                        //Delay necessário para não precisar passar valores como parametros desnecessariamente
+                        delay(100)
+                        viewModel.transformarObjetoJsoneEnviar()
                     }
 
-                    viewModel.updateParametrosFromDatabase()
+
+
+
                     Log.d("ParametrosUpdate", "Novos parâmetros: ${uiState.posicaoServoPortaMin}")
                 },
                 modifier = Modifier.padding(16.dp)

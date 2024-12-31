@@ -4,9 +4,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.colorsortingcontroller.data.Monitoramento
 import com.example.colorsortingcontroller.data.Parametros
 import com.example.colorsortingcontroller.data.ParametrosRepository
+
+
 import com.example.colorsortingcontroller.network.MQTTHandler
+import com.example.colorsortingcontroller.network.MQTTUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,19 +22,27 @@ import java.io.IOException
 import com.google.gson.JsonParser
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import org.eclipse.paho.client.mqttv3.MqttClient
 
 
 private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
-private val CLIENT_ID = "Android_Client"
+private val CLIENT_ID = "Android_ClientTestando"
+
 private lateinit var mqttHandler: MQTTHandler
 //private var ValorNovo by Delegates.notNull<Int>()
 
 class ParametrosViewModel(private val parametrosRepository: ParametrosRepository) : ViewModel() {
     private val _state = MutableStateFlow(ScreenState.parametros)
     val state: StateFlow<ScreenState> = _state
+    
+    //val para impedir mudanças indesejáveis na variável
+    private val valorParametrosList : ((List<Parametros>) -> Unit)? = null
 
     init {
         getConexao()
+
         subscribeToTopic("parametros", 1)
         subscribeToTopic("parametrosReceber", 1)
    //     obterTopico()
@@ -53,11 +66,13 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     fun getConexao() {
         viewModelScope.launch{
             try {
-                mqttHandler = MQTTHandler()
-                mqttHandler.connect(BROKER_URL , CLIENT_ID )
+
+
+                mqttHandler = MQTTHandler.getInstance()
+                mqttHandler.connect(BROKER_URL, CLIENT_ID)
 
             } catch(e: IOException) {
-                ColorUiState.Error
+                MQTTUiState.Error
             }
         }
     }
@@ -68,7 +83,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                 mqttHandler.subscribe(topic, nivelQos)
 
             } catch(e: IOException) {
-                ColorUiState.Error
+                MQTTUiState.Error
             }
         }
     }
@@ -79,7 +94,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
              //  Colocar Toast indicando que mensagem foi enviada na view
                 mqttHandler.publish(topic, message, nivelQos, retainedFlag)
             } catch(e: IOException) {
-                ColorUiState.Error
+                MQTTUiState.Error
             }
         }
     }
@@ -119,7 +134,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
 
             } catch(e: IOException) {
-                ColorUiState.Error
+                MQTTUiState.Error
             }
         }
     }
@@ -153,31 +168,16 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
          viewModelScope.launch {
              while(true) {
                  //Instância do objeto GSON
-                 delay(5000)
+                 delay(1)
                  //val gson = Gson()
                  //var json : FlowCollector<String>
 
                  //Conversão da mensagem em MQTT contendo uma string json para um objeto json
-                 if (mqttHandler.mqttStateParametros.value != null) {
-                     val objetoJson =
-                         JsonParser.parseString(mqttHandler.mqttStateParametros.value).asJsonObject
-                     _state2.value = ParametrosUiState(
-                         objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
-                         objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
-                         objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
-                         objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
-                         objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
-                         objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
-                         objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
-                         objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
-                         objetoJson.get("Cor").asString,
-                         objetoJson.get("R").asInt,
-                         objetoJson.get("G").asInt,
-                         objetoJson.get("B").asInt
-                     )
-                     // updateParametrosFromDatabase()
-                     if (parametros == null) {
-                         insert(
+                 synchronized(this) {
+                     if (mensagemMQTT.value != null) {
+                         val objetoJson =
+                             JsonParser.parseString(mensagemMQTT.value).asJsonObject
+                         _state2.value = ParametrosUiState(
                              objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
                              objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
                              objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
@@ -191,7 +191,39 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                              objetoJson.get("G").asInt,
                              objetoJson.get("B").asInt
                          )
-                     } else {
+                         // updateParametrosFromDatabase()
+                         if (valorParametrosList != null) {
+                             update(
+                                 objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
+                                 objetoJson.get("Cor").asString,
+                                 objetoJson.get("R").asInt,
+                                 objetoJson.get("G").asInt,
+                                 objetoJson.get("B").asInt
+                             )
+                         } else {
+                             insert(
+                                 objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
+                                 objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
+                                 objetoJson.get("Cor").asString,
+                                 objetoJson.get("R").asInt,
+                                 objetoJson.get("G").asInt,
+                                 objetoJson.get("B").asInt
+                             )
+
+                         }
                          update(
                              objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
                              objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
@@ -209,7 +241,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                      }
                  }
                  //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-                 println(" Mensagem atual: ${mqttHandler.mqttStateParametros.value}")
+                 println(" Mensagem atual: ${mensagemMQTT.value}")
              }
          }
 
@@ -374,7 +406,9 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                     )
                     _state2.value = novosParametros
                     Log.d("ParametrosUpdate", "Novos parâmetros: $novosParametros")
+                    valorParametrosList?.invoke(parametrosList)
                 }
+
             }
         }
     }

@@ -16,6 +16,7 @@ fun MonitoramentoScreen(viewModel: MonitoramentoViewModel = viewModel()) {
 
     val uiState by viewModel.stateMonitoramento.collectAsState()
 
+
     ColorSortingControllerTheme {
         Column(
             modifier = Modifier.padding(16.dp),

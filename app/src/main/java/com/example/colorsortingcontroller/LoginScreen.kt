@@ -50,6 +50,8 @@ import androidx.fragment.app.FragmentActivity
 import java.util.concurrent.Executor
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import kotlinx.coroutines.delay
+import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.ui.platform.LocalContext
 
 //Passar manipulação de dados para outra classe para seguir padrão viewModel
 lateinit var executor: Executor
@@ -62,8 +64,12 @@ interface SensorBiometrico {
 
 
 class LoginScreen : FragmentActivity(), SensorBiometrico {
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        auth = FirebaseAuth.getInstance()
 
         setContent {
             ColorSortingControllerTheme {
@@ -75,7 +81,7 @@ class LoginScreen : FragmentActivity(), SensorBiometrico {
             // Depois de 3 segundos, exibe a tela de login
             setContent {
                 ColorSortingControllerTheme {
-                    ScaffoldLogin()
+                    ScaffoldLogin(auth = auth)
                 }
             }
         }, 3000)  // Tempo de delay (3 segundos)
@@ -162,7 +168,9 @@ class LoginScreen : FragmentActivity(), SensorBiometrico {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldLogin() {
+fun ScaffoldLogin(auth: FirebaseAuth) {
+    val context = LocalContext.current // Obtém o Contexto válido do Compose
+
     ColorSortingControllerTheme {
         Scaffold(
             topBar = {
@@ -183,10 +191,10 @@ fun ScaffoldLogin() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                var text by rememberSaveable { mutableStateOf("") }
+                var email by rememberSaveable { mutableStateOf("") }
                 var password by rememberSaveable { mutableStateOf("") }
                 var passwordVisibility by rememberSaveable { mutableStateOf(false) }
-                val chamadaDeFuncao : SensorBiometrico = LoginScreen()
+                val chamadaDeFuncao: SensorBiometrico = LoginScreen()
 
                 val icon = if (passwordVisibility)
                     painterResource(id = R.drawable.design_icon_visibility)
@@ -194,10 +202,10 @@ fun ScaffoldLogin() {
                     painterResource(id = R.drawable.design_icon_visibility_off)
 
                 OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = { Text(text = "Login") },
-                    label = { Text("Insira o seu login") }
+                    value = email,
+                    onValueChange = { email = it },
+                    placeholder = { Text(text = "Email") },
+                    label = { Text("Insira o seu email") }
                 )
                 OutlinedTextField(
                     value = password,
@@ -218,7 +226,28 @@ fun ScaffoldLogin() {
                 )
                 Button(
                     onClick = {
-                        // nada ainda
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    // Login bem-sucedido
+                                    Toast.makeText(
+                                        context,
+                                        "Login realizado com sucesso!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+
+                                    // Redireciona para a tela principal
+                                    val intent = Intent(context, MainActivity::class.java)
+                                    context.startActivity(intent)
+                                } else {
+                                    // Falha no login
+                                    Toast.makeText(
+                                        context,
+                                        "Erro: ${task.exception?.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                     },
                     modifier = Modifier.padding(top = 32.dp)
                 ) {

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+    id("com.google.gms.google-services")
 }
 
 configurations.all {
@@ -78,6 +79,7 @@ dependencies {
     implementation(libs.testng)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.recyclerview)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -120,5 +122,10 @@ dependencies {
 
     //Charts
     implementation(libs.charts)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
 
 }

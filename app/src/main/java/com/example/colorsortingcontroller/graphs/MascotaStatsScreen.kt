@@ -24,27 +24,22 @@ import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
 
 
 @Composable
-fun MascotaStatsScreen(){
+fun MascotaStatsScreen(pecasPorCor: List<Datos>) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
-        Text(text = "Gráfico Estatístico",
-            style = MaterialTheme.typography.headlineMedium)
-        Barras()
-
+        Text(
+            text = "Peças separadas por cor",
+            style = MaterialTheme.typography.headlineMedium
+        )
+        Barras(pecasPorCor)
     }
 }
 
 @Composable
-fun Barras() {
-    val datos: List<Datos> = listOf(
-        Datos("Vermelho", 15),
-        Datos("Amarelo", 27),
-        Datos("Verde", 32),
-        Datos("Azul", 80)
-    )
-    var barras = ArrayList<BarChartData.Bar>()
-    datos.mapIndexed { index, datos ->
+fun Barras(pecasPorCor: List<Datos>) {
+    val barras = ArrayList<BarChartData.Bar>()
+    pecasPorCor.map { datos ->
         barras.add(
             BarChartData.Bar(
                 label = datos.label,
@@ -54,9 +49,7 @@ fun Barras() {
         )
     }
     BarChart(
-        barChartData = BarChartData(
-            bars = barras
-        ),
+        barChartData = BarChartData(bars = barras),
         modifier = Modifier
             .padding(horizontal = 30.dp, vertical = 80.dp)
             .height(300.dp),
@@ -65,7 +58,6 @@ fun Barras() {
         )
     )
     LineaPunteada()
-
 }
 
 @Composable
@@ -79,30 +71,20 @@ fun Pastel() {
     var slices = ArrayList<PieChartData.Slice>()
     datos.mapIndexed { index, datos ->
         slices.add(PieChartData.Slice(
-
             value = datos.value.toFloat(),
-
             color = randomColor(),
-
-
             ))
         PieChart(
             pieChartData = PieChartData(
                 slices = slices,
-
                 ),
             modifier = Modifier
                 .padding(horizontal = 30.dp, vertical = 80.dp)
                 .height(300.dp),
             sliceDrawer = SimpleSliceDrawer(
                 sliceThickness = 100f
-
             )
-
-
         )
-
-
     }
 }
 

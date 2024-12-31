@@ -9,7 +9,10 @@ import androidx.compose.ui.Modifier
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.colorsortingcontroller.model.Datos
 import com.example.colorsortingcontroller.screen.graphs.Lineas
+import com.example.colorsortingcontroller.screen.graphs.MascotaStatsScreen
+import com.example.colorsortingcontroller.screen.graphs.Pastel
 
 // Tela de Estatísticas
 @Composable
@@ -54,9 +57,22 @@ fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
                 }
             }
             //Por enquanto só dá para por um por vez
-            Lineas()
-            //Pastel()
-            //MascotaStatsScreen()
+            //Lineas() // Linha
+            //Pastel() // Pizza
+
+            /*
+            MascotaStatsScreen(pecasPorCor = listOf(
+                Datos("Cor 1", uiState.pecasCor1),
+                Datos("Cor 2", uiState.pecasCor2),
+                Datos("Cor 3", uiState.pecasCor3),
+                Datos("Cor 4", uiState.pecasCor4),
+                Datos("Cor 5", uiState.pecasCor5),
+                Datos("Cor 6", uiState.pecasCor6),
+                Datos("Cor 7", uiState.pecasCor7),
+                Datos("Cor 8", uiState.pecasCor8)
+            )
+            )*/
+
         }
     }
 }
