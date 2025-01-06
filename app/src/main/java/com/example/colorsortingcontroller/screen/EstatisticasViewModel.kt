@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.lang.Thread.sleep
 
 private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
 private val CLIENT_ID = "Android_ClientTestando"
@@ -35,7 +36,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     val state: StateFlow<ScreenState> = _state
 
     //val para impedir mudanças indesejáveis na variável
-    private val valorEstatisticasList : ((List<Estatisticas>) -> Unit)? = null
+    private var valorEstatisticasList : MutableStateFlow<Int>? = null
 
     init {
         getConexao()
@@ -184,6 +185,8 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
 
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateEstatisticas
 
+    val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
+
 
 
     fun manipularMensagemMQTT() {
@@ -227,6 +230,8 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                             _stateEstatisticas.value.pecasColetor3,
                             _stateEstatisticas.value.pecasColetor4,
                         )
+                        updateEstatisticasFromDatabase()
+                        sleep(100)
                     } else {
                         insertEstatisticas(
                             _stateEstatisticas.value.pecasCor1,
@@ -242,22 +247,12 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                             _stateEstatisticas.value.pecasColetor3,
                             _stateEstatisticas.value.pecasColetor4,
                         )
+                        updateEstatisticasFromDatabase()
+                        //Garantir que não seja realizado mais de um insert
+                        valorEstatisticasList = MutableStateFlow(1)
+
                     }
 
-                    updateEstatisticas(
-                        _stateEstatisticas.value.pecasCor1,
-                        _stateEstatisticas.value.pecasCor2,
-                        _stateEstatisticas.value.pecasCor3,
-                        _stateEstatisticas.value.pecasCor4,
-                        _stateEstatisticas.value.pecasCor5,
-                        _stateEstatisticas.value.pecasCor6,
-                        _stateEstatisticas.value.pecasCor7,
-                        _stateEstatisticas.value.pecasCor8,
-                        _stateEstatisticas.value.pecasColetor1,
-                        _stateEstatisticas.value.pecasColetor2,
-                        _stateEstatisticas.value.pecasColetor3,
-                        _stateEstatisticas.value.pecasColetor4,
-                    )
                 }
                 /*    updateEstatisticas(
                         _stateEstatisticas.value.pecasCor1,
@@ -278,7 +273,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
             }
         }
         //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-        println(" Mensagem atual: ${mensagemMQTT.value}")
+  //      println(" Mensagem atual: ${mensagemMQTT.value}")
     }
 
     data class EstatisticasUiState(
@@ -319,7 +314,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                     )
                     _stateEstatisticas.value = novasEstatisticas
                     Log.d("EstatisticasUpdate", "Novas estatísticas: $novasEstatisticas")
-                    valorEstatisticasList?.invoke(estatisticasList)
+                    valorEstatisticasList = MutableStateFlow(1)
                 }
 
             }

@@ -17,7 +17,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getDatabase(
             context: Context,
-            applicationScope: CoroutineScope
+            //applicationScope: CoroutineScope
         ): AppDatabase {
 
             return Instance ?: synchronized(this) {

@@ -1,6 +1,7 @@
 package com.example.colorsortingcontroller.screen
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -25,6 +27,7 @@ import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 
 @Composable
@@ -35,20 +38,12 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
     val parametros by viewModel.parametros.collectAsState(initial = null)
     val uiState by viewModel.state2.collectAsState()
-    val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT"/*"{\n" +
-            "\t\"PosicaoServoPortaAnguloMinimo\" : \"14\",\n" +
-            "\t\"PosicaoServoPortaAnguloMaximo\" : \"89\",\n" +
-            "\t\"PosicaoServoDirecionadorEDAnguloMinimo\" : \"13\",\n" +
-            "\t\"PosicaoServoDirecionadorEDAnguloMaximo\" : \"97\",\n" +
-            "\t\"PosicaoServoDirecionador12AnguloMinimo\" : \"75\",\n" +
-            "\t\"PosicaoServoDirecionador12AnguloMaximo\" : \"82\",\n" +
-            "\t\"PosicaoServoDirecionador34AnguloMinimo\" : \"27\",\n" +
-            "\t\"PosicaoServoDirecionador34AnguloMaximo\" : \"14\",\n" +
-            "\t\"R\" : \"100\",\n" +
-            "\t\"G\" : \"200\",\n" +
-            "\t\"B\" : \"150\",\n" +
-            "\t\"Cor\":\"25\"\n" +
-            "}" */)
+    val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT")
+
+    val conexaoState by viewModel.conexaoMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Desconectado")
+
+    val mensagemEntregue by viewModel.mensagemEntregue.asFlow().collectAsStateWithLifecycle(initialValue = "")
+
     val coroutineScope = rememberCoroutineScope()
 
     // Banco de Dados
@@ -99,12 +94,14 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
         ) {
         ///    viewModel.ReceberAtualizar()
             // Exibe os valores da uiState
+            Text("Estado da conexão: $conexaoState")
             Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
             Text("UI State - Posição Servo Direcionador ED Min: ${uiState.posicaoServoDirecionadorEDMin}, Max: ${uiState.posicaoServoDirecionadorEDMax}")
             Text("UI State - Posição Servo Direcionador 12 Min: ${uiState.posicaoServoDirecionador12Min}, Max: ${uiState.posicaoServoDirecionador12Max}")
             Text("UI State - Posição Servo Direcionador 34 Min: ${uiState.posicaoServoDirecionador34Min}, Max: ${uiState.posicaoServoDirecionador34Max}")
             Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
             Text("Comunicação UI State -  $mensagemMQTT")
+            Text("$mensagemEntregue")
             // Exibe o valor atual antes dos cards
             Text("Posição Servo Porta - Min: $bdPosicaoServoPortaMin Max: $bdPosicaoServoPortaMax")
             AngleCard(
@@ -161,7 +158,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
             Button(
                 onClick = {
-                    coroutineScope.launch {
+                 //   coroutineScope.launch {
                        // viewModel.manipularMensagemMQTT()
                       //  viewModel.transformarObjetoJsoneEnviar()
                         if (parametros == null) {
@@ -196,10 +193,18 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                             )
                         }
                         viewModel.updateParametrosFromDatabase()
-                        //Delay necessário para não precisar passar valores como parametros desnecessariamente
-                        delay(100)
                         viewModel.transformarObjetoJsoneEnviar()
-                    }
+
+                        //Esperar envio ser concluído pelo viewModel
+                       // delay(100)
+                       // if(mensagemEntregue != null) {
+
+
+                    //Toast.makeText(LocalContext, mensagemEntregue.toString(), Toast.LENGTH_SHORT).show()
+                       // }
+
+
+                //    }
 
 
 

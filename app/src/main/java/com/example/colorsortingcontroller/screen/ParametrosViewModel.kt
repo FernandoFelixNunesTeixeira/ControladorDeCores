@@ -1,6 +1,7 @@
 package com.example.colorsortingcontroller.screen
 
 import android.util.Log
+import android.util.MutableInt
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import org.eclipse.paho.client.mqttv3.MqttClient
+import java.lang.Thread.sleep
 
 
 private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
@@ -38,17 +40,19 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     val state: StateFlow<ScreenState> = _state
     
     //val para impedir mudanças indesejáveis na variável
-    private val valorParametrosList : ((List<Parametros>) -> Unit)? = null
+    private var valorParametrosList : MutableStateFlow<Int>? = null
 
     init {
         getConexao()
 
-        subscribeToTopic("parametros", 1)
-        subscribeToTopic("parametrosReceber", 1)
+        subscribeToTopic("parametros", 2)
+        subscribeToTopic("parametrosReceber", 2)
    //     obterTopico()
         //obterJson()
         updateParametrosFromDatabase()
         manipularMensagemMQTT()
+
+
         //getValor()
             //ReceberAtualizar()
 
@@ -66,8 +70,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     fun getConexao() {
         viewModelScope.launch{
             try {
-
-
                 mqttHandler = MQTTHandler.getInstance()
                 mqttHandler.connect(BROKER_URL, CLIENT_ID)
 
@@ -93,6 +95,10 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
             try {
              //  Colocar Toast indicando que mensagem foi enviada na view
                 mqttHandler.publish(topic, message, nivelQos, retainedFlag)
+                delay(100)
+
+
+
             } catch(e: IOException) {
                 MQTTUiState.Error
             }
@@ -102,8 +108,9 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
     fun transformarObjetoJsoneEnviar( ) {
 
-
+        //Delay necessário por evitar passar parametros novamente
         viewModelScope.launch{
+            delay(100)
             try {
                 var objetoJsonParametros = "{ "  + "\"" +  "PosicaoServoPortaAnguloMinimo" + "\" :" +
                         "\"" + state2.value.posicaoServoPortaMin.toString() + "\"" + "," +
@@ -129,7 +136,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                         "\"" +  state2.value.gValue.toString() + "\"" + "," +
                         "\"" + "B"  + "\" :" +
                         "\"" +  state2.value.bValue.toString() + "\"" + " }"
-                publishMessage("parametros",  objetoJsonParametros, 1, false )
+                publishMessage("parametros",  objetoJsonParametros, 2, false )
 
 
 
@@ -150,6 +157,10 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateParametros
 
+
+    val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
+
+    val mensagemEntregue: LiveData<String> get() = mqttHandler.mqttStateEntregaMensagem
 //
  //   "PosicaoServoPortaAnguloMinimo" : "14",
  //   "PosicaoServoPortaAnguloMaximo" : "89",
@@ -164,6 +175,8 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 //    "B" : "150",
  //   "Cor":"25"
 
+
+
      fun manipularMensagemMQTT(){
          viewModelScope.launch {
              while(true) {
@@ -174,6 +187,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
                  //Conversão da mensagem em MQTT contendo uma string json para um objeto json
                  synchronized(this) {
+
                      if (mensagemMQTT.value != null) {
                          val objetoJson =
                              JsonParser.parseString(mensagemMQTT.value).asJsonObject
@@ -194,54 +208,49 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                          // updateParametrosFromDatabase()
                          if (valorParametrosList != null) {
                              update(
-                                 objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
-                                 objetoJson.get("Cor").asString,
-                                 objetoJson.get("R").asInt,
-                                 objetoJson.get("G").asInt,
-                                 objetoJson.get("B").asInt
+                                 _state2.value.posicaoServoPortaMin,
+                                 _state2.value.posicaoServoPortaMax,
+                                 _state2.value.posicaoServoDirecionadorEDMin,
+                                 _state2.value.posicaoServoDirecionadorEDMax,
+                                 _state2.value.posicaoServoDirecionador12Min,
+                                 _state2.value.posicaoServoDirecionador12Max,
+                                 _state2.value.posicaoServoDirecionador34Min,
+                                 _state2.value.posicaoServoDirecionador34Max,
+                                 _state2.value.cor,
+                                 _state2.value.rValue,
+                                 _state2.value.gValue,
+                                 _state2.value.bValue
                              )
+                             updateParametrosFromDatabase()
+                            sleep(100)
+                           //  updateParametrosFromDatabase()
                          } else {
                              insert(
-                                 objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
-                                 objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
-                                 objetoJson.get("Cor").asString,
-                                 objetoJson.get("R").asInt,
-                                 objetoJson.get("G").asInt,
-                                 objetoJson.get("B").asInt
+                                 _state2.value.posicaoServoPortaMin,
+                                 _state2.value.posicaoServoPortaMax,
+                                 _state2.value.posicaoServoDirecionadorEDMin,
+                                 _state2.value.posicaoServoDirecionadorEDMax,
+                                 _state2.value.posicaoServoDirecionador12Min,
+                                 _state2.value.posicaoServoDirecionador12Max,
+                                 _state2.value.posicaoServoDirecionador34Min,
+                                 _state2.value.posicaoServoDirecionador34Max,
+                                 _state2.value.cor,
+                                 _state2.value.rValue,
+                                 _state2.value.gValue,
+                                 _state2.value.bValue
                              )
+                             updateParametrosFromDatabase()
+                             //Garantir que não seja realizado mais de um insert
+                             valorParametrosList = MutableStateFlow(1)
+                           //  contador = MutableStateFlow(1)
+                           //  updateParametrosFromDatabase()
 
                          }
-                         update(
-                             objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
-                             objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
-                             objetoJson.get("PosicaoServoDirecionadorEDAnguloMinimo").asInt,
-                             objetoJson.get("PosicaoServoDirecionadorEDAnguloMaximo").asInt,
-                             objetoJson.get("PosicaoServoDirecionador12AnguloMinimo").asInt,
-                             objetoJson.get("PosicaoServoDirecionador12AnguloMaximo").asInt,
-                             objetoJson.get("PosicaoServoDirecionador34AnguloMinimo").asInt,
-                             objetoJson.get("PosicaoServoDirecionador34AnguloMaximo").asInt,
-                             objetoJson.get("Cor").asString,
-                             objetoJson.get("R").asInt,
-                             objetoJson.get("G").asInt,
-                             objetoJson.get("B").asInt
-                         )
+
                      }
                  }
                  //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-                 println(" Mensagem atual: ${mensagemMQTT.value}")
+             //    println(" Mensagem atual: ${mensagemMQTT.value}")
              }
          }
 
@@ -406,11 +415,14 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                     )
                     _state2.value = novosParametros
                     Log.d("ParametrosUpdate", "Novos parâmetros: $novosParametros")
-                    valorParametrosList?.invoke(parametrosList)
+                    valorParametrosList = MutableStateFlow(1)
                 }
 
             }
         }
     }
+
+
+
 }
 

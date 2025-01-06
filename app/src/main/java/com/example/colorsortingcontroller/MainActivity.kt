@@ -30,12 +30,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val database = Room.databaseBuilder(
+        /*val database = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
             "app_database"
-        ).build()
-
+        ).build()*/
+        val database = AppDatabase.getDatabase(applicationContext)
         val appDao: AppDao = database.appDao()
 
         val monitoramentoSource = MonitoramentoLocalSource(appDao)

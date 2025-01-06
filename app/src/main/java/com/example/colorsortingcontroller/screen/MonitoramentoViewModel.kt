@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.lang.Thread.sleep
 
 
 private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
@@ -38,8 +39,8 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
     private val _state = MutableStateFlow(ScreenState.monitoramento)
     val state: StateFlow<ScreenState> = _state
 
-    //val para impedir mudanças indesejáveis na variável
-    private val valorMonitoramentoList : ((List<Monitoramento>) -> Unit)? = null
+    //var para impedir mudanças indesejáveis na variável
+    private var valorMonitoramentoList : MutableStateFlow<Int>? = null
 
 
 
@@ -154,11 +155,11 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
 
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateMonitoramento
 
-
+    val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
 
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
-            while (true) {
+            while(true) {
                 //Instância do objeto GSON
                 delay(1)
                 //val gson = Gson()
@@ -168,21 +169,26 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
                 if (mensagemMQTT.value != null) {
                     val objetoJson =
                         JsonParser.parseString(mensagemMQTT.value).asJsonObject
-                    val novoMonitoramento = MonitoramentoUiState(
-                        objetoJson.get("EstadoAtual").asString,
-                        objetoJson.get("CorAtual").asString
-                    )
-                        _stateMonitoramento.value = novoMonitoramento
+                        _stateMonitoramento.value =  MonitoramentoUiState(
+                            objetoJson.get("EstadoAtual").asString,
+                            objetoJson.get("CorAtual").asString
+                        )
                         if (valorMonitoramentoList != null) {
                             updateMonitoramento(
-                                novoMonitoramento.estado,
-                                novoMonitoramento.corAtual
+                                _stateMonitoramento.value.estado,
+                                _stateMonitoramento.value.corAtual
                             )
-                        } else {
+                            updateMonitoramentoFromDatabase()
+                            sleep(100)
+                        } else{
                             insertMonitoramento(
-                                novoMonitoramento.estado,
-                                novoMonitoramento.corAtual
+                                _stateMonitoramento.value.estado,
+                                _stateMonitoramento.value.corAtual
                             )
+                            updateMonitoramentoFromDatabase()
+                            //Garantir que não seja realizado mais de um insert
+                            valorMonitoramentoList = MutableStateFlow(1)
+
                         }
                     }
                     //updateMonitoramento(_stateMonitoramento.value.estado, _stateMonitoramento.value.corAtual)
@@ -195,7 +201,7 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
             }
         }
         //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-        println(" Mensagem atual: ${mensagemMQTT.value}")
+      //  println(" Mensagem atual: ${mensagemMQTT.value}")
     }
 
     //var ListaMonitoramento : List<Monitoramento> = emptyList()
@@ -214,7 +220,9 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
 
                         _stateMonitoramento.value = novosMonitoramentos
                         Log.d("MonitoramentoUpdate", "Novos monitoramentos: $novosMonitoramentos")
-                        valorMonitoramentoList?.invoke(monitoramentoList)
+                    //    valorMonitoramentoList?.invoke(monitoramentoList)
+                        valorMonitoramentoList = MutableStateFlow(1)
+
                     }
 
                 }

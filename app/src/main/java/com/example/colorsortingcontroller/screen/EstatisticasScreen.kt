@@ -8,8 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.colorsortingcontroller.model.Datos
+import com.example.colorsortingcontroller.network.MQTTHandler
 import com.example.colorsortingcontroller.screen.graphs.Lineas
 import com.example.colorsortingcontroller.screen.graphs.MascotaStatsScreen
 import com.example.colorsortingcontroller.screen.graphs.Pastel
@@ -20,11 +23,16 @@ fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
 
     val uiState by viewModel.stateEstatisticas.collectAsState()
 
+    val conexaoState by viewModel.conexaoMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Desconectado")
+
     ColorSortingControllerTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text("Estado da conexão: $conexaoState")
+
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
