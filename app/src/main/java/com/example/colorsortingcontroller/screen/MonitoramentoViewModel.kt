@@ -39,37 +39,15 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
     private val _state = MutableStateFlow(ScreenState.monitoramento)
     val state: StateFlow<ScreenState> = _state
 
-    //var para impedir mudanças indesejáveis na variável
     private var valorMonitoramentoList : MutableStateFlow<Int>? = null
-
-
 
     init {
         getConexao()
-
-
         subscribeToTopic("monitoramento", 1)
         subscribeToTopic("monitoramentoReceber", 1)
-       // manipularMensagemMQTT()
-        //obterTopico()
-        //obterJson()
-
-        // Apenas para testes iniciais:
-     //   insertMonitoramento("tst_AbrePortaaa", "tst_Vermelhoooo")
-
-
         updateMonitoramentoFromDatabase()
         manipularMensagemMQTT()
-
-     //   updateMonitoramentoFromDatabase()
-      //  updateMonitoramentoFromDatabase()
-        //getValor()
-        //ReceberAtualizar()
     }
-
-    // Recebe todos os valores do repositório
-    val allMonitoramento: Flow<List<Monitoramento>> = monitoramentoRepository.allMonitoramento
-
     // Envia a lista de monitoramento para a UI
     val monitoramento = monitoramentoRepository.allMonitoramento.map { list ->
         list.firstOrNull()
@@ -121,15 +99,8 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
     fun getConexao() {
         viewModelScope.launch {
             try {
-
                 mqttHandler = MQTTHandler.getInstance()
                 mqttHandler.connect(BROKER_URL, CLIENT_ID)
-
-
-
-             //   mqttHandler.connect(BROKER_URL, CLIENT_ID)
-            // MQTTHandler() mqttHandler.connect()
-
             } catch (e: IOException) {
                 MQTTUiState.Error
             }
@@ -140,7 +111,6 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
         viewModelScope.launch {
             try {
                 mqttHandler.subscribe(topic, nivelQos);
-
             } catch (e: IOException) {
                 MQTTUiState.Error
             }
@@ -151,10 +121,7 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
     private val _stateMonitoramento = MutableStateFlow(MonitoramentoUiState())
     val stateMonitoramento: StateFlow<MonitoramentoUiState> = _stateMonitoramento
 
-    //   val conexaoParametrosUiState = mqttHandler.state3.value
-
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateMonitoramento
-
     val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
 
     fun manipularMensagemMQTT() {
@@ -191,42 +158,25 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
 
                         }
                     }
-                    //updateMonitoramento(_stateMonitoramento.value.estado, _stateMonitoramento.value.corAtual)
-                    //updateMonitoramento(_stateMonitoramento.value.estado, _stateMonitoramento.value.corAtual)
-                 //   delay(500)
-                //    updateMonitoramento(_stateMonitoramento.value.estado, _stateMonitoramento.value.corAtual)
-
-
                 }
             }
         }
-        //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-      //  println(" Mensagem atual: ${mensagemMQTT.value}")
     }
-
-    //var ListaMonitoramento : List<Monitoramento> = emptyList()
 
     fun updateMonitoramentoFromDatabase() {
         viewModelScope.launch {
-
-                monitoramentoRepository.allMonitoramento.collect { monitoramentoList ->
-                    Log.d("MonitoramentoUpdate", "monitoramentoList: $monitoramentoList")
-                    if (monitoramentoList.isNotEmpty()) {
-                        val novosMonitoramentos = MonitoramentoUiState(
-                            estado = monitoramentoList[0].estado,
-                            corAtual = monitoramentoList[0].corAtual
-                        )
-                        // ListaMonitoramento = monitoramentoList
-
-                        _stateMonitoramento.value = novosMonitoramentos
-                        Log.d("MonitoramentoUpdate", "Novos monitoramentos: $novosMonitoramentos")
-                    //    valorMonitoramentoList?.invoke(monitoramentoList)
-                        valorMonitoramentoList = MutableStateFlow(1)
-
-                    }
-
+            monitoramentoRepository.allMonitoramento.collect { monitoramentoList ->
+                Log.d("MonitoramentoUpdate", "monitoramentoList: $monitoramentoList")
+                if (monitoramentoList.isNotEmpty()) {
+                    val novosMonitoramentos = MonitoramentoUiState(
+                        estado = monitoramentoList[0].estado,
+                        corAtual = monitoramentoList[0].corAtual
+                    )
+                    _stateMonitoramento.value = novosMonitoramentos
+                    Log.d("MonitoramentoUpdate", "Novos monitoramentos: $novosMonitoramentos")
+                    valorMonitoramentoList = MutableStateFlow(1)
                 }
-
+            }
         }
     }
 }

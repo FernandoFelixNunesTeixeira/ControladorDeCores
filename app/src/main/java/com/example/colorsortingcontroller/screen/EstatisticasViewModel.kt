@@ -28,8 +28,8 @@ import java.lang.Thread.sleep
 
 private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
 private val CLIENT_ID = "Android_ClientTestando"
-private lateinit var mqttHandler: MQTTHandler
 
+private lateinit var mqttHandler: MQTTHandler
 
 class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepository) : ViewModel() {
     private val _state = MutableStateFlow(ScreenState.estatisticas)
@@ -40,28 +40,11 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
 
     init {
         getConexao()
-
         subscribeToTopic("estatisticas", 1)
         subscribeToTopic("estatisticasReceber", 1)
-    //    manipularMensagemMQTT()
-        //obterTopico()
-        //obterJson()
-
-        // Apenas para testes iniciais:
-      //  insertEstatisticas(12, 5, 10, 12, 33, 41,
-       //     4, 7, 93, 12, 55, 32)
-
         updateEstatisticasFromDatabase()
-
-
         manipularMensagemMQTT()
-
-
     }
-
-    // Recebe todos os valores do repositório
-    val allEstatisticas: Flow<List<Estatisticas>> = estatisticasRepository.allEstatisticas
-
     // Envia a lista de monitoramento para a UI
     val estatisticas = estatisticasRepository.allEstatisticas.map { list ->
         list.firstOrNull()
@@ -173,29 +156,17 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         }
     }
 
-
     private val _stateEstatisticas = MutableStateFlow(EstatisticasUiState())
     val stateEstatisticas: StateFlow<EstatisticasUiState> = _stateEstatisticas
-    //  .stateIn(
-    //      scope = viewModelScope,
-    //      started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-    //     initialValue = EstatisticasUiState()
-    //  )
-    //   val conexaoParametrosUiState = mqttHandler.state3.value
 
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateEstatisticas
-
     val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
-
-
 
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
             while (true) {
                 //Instância do objeto GSON
                 delay(1)
-                //val gson = Gson()
-
                 //Conversão da mensagem em MQTT contendo uma string json para um objeto json
                 synchronized(this) {
                 if (mensagemMQTT.value != null) {
@@ -252,28 +223,10 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                         valorEstatisticasList = MutableStateFlow(1)
 
                     }
-
                 }
-                /*    updateEstatisticas(
-                        _stateEstatisticas.value.pecasCor1,
-                        _stateEstatisticas.value.pecasCor2,
-                        _stateEstatisticas.value.pecasCor3,
-                        _stateEstatisticas.value.pecasCor4,
-                        _stateEstatisticas.value.pecasCor5,
-                        _stateEstatisticas.value.pecasCor6,
-                        _stateEstatisticas.value.pecasCor7,
-                        _stateEstatisticas.value.pecasCor8,
-                        _stateEstatisticas.value.pecasColetor1,
-                        _stateEstatisticas.value.pecasColetor2,
-                        _stateEstatisticas.value.pecasColetor3,
-                        _stateEstatisticas.value.pecasColetor4,
-                    ) */
-
                 }
             }
         }
-        //Mensagem para debug, deixar pelo menos enquanto não tiver o projeto praticamente pronto
-  //      println(" Mensagem atual: ${mensagemMQTT.value}")
     }
 
     data class EstatisticasUiState(
@@ -316,7 +269,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                     Log.d("EstatisticasUpdate", "Novas estatísticas: $novasEstatisticas")
                     valorEstatisticasList = MutableStateFlow(1)
                 }
-
             }
         }
     }

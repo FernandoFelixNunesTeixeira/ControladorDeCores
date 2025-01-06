@@ -12,10 +12,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.colorsortingcontroller.model.Datos
-import com.example.colorsortingcontroller.network.MQTTHandler
-import com.example.colorsortingcontroller.screen.graphs.Lineas
 import com.example.colorsortingcontroller.screen.graphs.MascotaStatsScreen
-import com.example.colorsortingcontroller.screen.graphs.Pastel
 
 // Tela de Estatísticas
 @Composable
@@ -31,7 +28,6 @@ fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text("Estado da conexão: $conexaoState")
-
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -64,23 +60,22 @@ fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
                             "1: [${uiState.pecasColetor1}] 2: [${uiState.pecasColetor2}] 3: [${uiState.pecasColetor3}] 4: [${uiState.pecasColetor4}]")
                 }
             }
-            //Por enquanto só dá para por um por vez
-            //Lineas() // Linha
-            //Pastel() // Pizza
-
-            /*
             MascotaStatsScreen(pecasPorCor = listOf(
-                Datos("Cor 1", uiState.pecasCor1),
-                Datos("Cor 2", uiState.pecasCor2),
-                Datos("Cor 3", uiState.pecasCor3),
-                Datos("Cor 4", uiState.pecasCor4),
-                Datos("Cor 5", uiState.pecasCor5),
-                Datos("Cor 6", uiState.pecasCor6),
-                Datos("Cor 7", uiState.pecasCor7),
-                Datos("Cor 8", uiState.pecasCor8)
+                Datos("Cor 1", uiState.pecasCor1 ?: 0),
+                Datos("Cor 2", uiState.pecasCor2 ?: 0),
+                Datos("Cor 3", uiState.pecasCor3 ?: 0),
+                Datos("Cor 4", uiState.pecasCor4 ?: 0),
+                Datos("Cor 5", uiState.pecasCor5 ?: 0),
+                Datos("Cor 6", uiState.pecasCor6 ?: 0),
+                Datos("Cor 7", uiState.pecasCor7 ?: 0),
+                Datos("Cor 8", uiState.pecasCor8 ?: 0)
+            ), pecasPorColetor = listOf(
+                Datos("Coletor 1", uiState.pecasColetor1 ?: 0),
+                Datos("Coletor 2", uiState.pecasColetor2 ?: 0),
+                Datos("Coletor 3", uiState.pecasColetor3 ?: 0),
+                Datos("Coletor 4", uiState.pecasColetor4 ?: 0)
             )
-            )*/
-
+            )
         }
     }
 }

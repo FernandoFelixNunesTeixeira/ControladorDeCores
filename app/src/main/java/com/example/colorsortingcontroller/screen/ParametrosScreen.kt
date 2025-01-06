@@ -32,36 +32,11 @@ import kotlin.coroutines.coroutineContext
 
 @Composable
 fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
-    //Inicializar de forma mais adeqauda depois
-    //var viewModel2: MQTTHandler = viewModel()
-
-
     val parametros by viewModel.parametros.collectAsState(initial = null)
-    val uiState by viewModel.state2.collectAsState()
+    val uiState by viewModel.stateParametros.collectAsState()
     val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT")
-
     val conexaoState by viewModel.conexaoMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Desconectado")
-
     val mensagemEntregue by viewModel.mensagemEntregue.asFlow().collectAsStateWithLifecycle(initialValue = "")
-
-    val coroutineScope = rememberCoroutineScope()
-
-    // Banco de Dados
-    val parametrosList by viewModel.allParametros.collectAsState(initial = emptyList())
-
-    val bdPosicaoServoPortaMin = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoPortaMin else 0
-    val bdPosicaoServoPortaMax = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoPortaMax else 0
-    val bdPosicaoServoDirecionadorEDMin = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionadorEDMin else 0
-    val bdPosicaoServoDirecionadorEDMax = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionadorEDMax else 0
-    val bdPosicaoServoDirecionador12Min = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador12Min else 0
-    val bdPosicaoServoDirecionador12Max = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador12Max else 0
-    val bdPosicaoServoDirecionador34Min = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador34Min else 0
-    val bdPosicaoServoDirecionador34Max = if (parametrosList.isNotEmpty()) parametrosList[0].posicaoServoDirecionador34Max else 0
-    val bdCor = if (parametrosList.isNotEmpty()) parametrosList[0].cor else 0
-
-    val bdRValue = if (parametrosList.isNotEmpty()) parametrosList[0].rValue else 0
-    val bdGValue = if (parametrosList.isNotEmpty()) parametrosList[0].gValue else 0
-    val bdBValue = if (parametrosList.isNotEmpty()) parametrosList[0].bValue else 0
 
     // Variáveis para INPUT
 
@@ -92,7 +67,6 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-        ///    viewModel.ReceberAtualizar()
             // Exibe os valores da uiState
             Text("Estado da conexão: $conexaoState")
             Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
@@ -102,8 +76,9 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
             Text("Comunicação UI State -  $mensagemMQTT")
             Text("$mensagemEntregue")
+
             // Exibe o valor atual antes dos cards
-            Text("Posição Servo Porta - Min: $bdPosicaoServoPortaMin Max: $bdPosicaoServoPortaMax")
+            Text("Posição Servo Porta - Min: ${uiState.posicaoServoPortaMin} Max: ${uiState.posicaoServoPortaMax}")
             AngleCard(
                 label = "Posição Servo Porta",
                 posicaoMin = posicaoServoPortaMin,
@@ -113,7 +88,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             )
 
             // Exibe o valor atual antes dos cards
-            Text("Posição Servo Direcionador ED - Min: $bdPosicaoServoDirecionadorEDMin Max: $bdPosicaoServoDirecionadorEDMax")
+            Text("Posição Servo Direcionador ED - Min: ${uiState.posicaoServoDirecionadorEDMin} Max: ${uiState.posicaoServoDirecionadorEDMax}")
             AngleCard(
                 label = "Posição Servo Direcionador ED",
                 posicaoMin = posicaoServoDirecionadorEDMin,
@@ -123,7 +98,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             )
 
             // Exibe o valor atual antes dos cards
-            Text("Posição Servo Direcionador 12 - Min: $bdPosicaoServoDirecionador12Min Max: $bdPosicaoServoDirecionador12Max")
+            Text("Posição Servo Direcionador 12 - Min: ${uiState.posicaoServoDirecionador12Min} Max: ${uiState.posicaoServoDirecionador12Max}")
             AngleCard(
                 label = "Posição Servo Direcionador 12",
                 posicaoMin = posicaoServoDirecionador12Min,
@@ -133,7 +108,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             )
 
             // Exibe o valor atual antes dos cards
-            Text("Posição Servo Direcionador 34 - Min: $bdPosicaoServoDirecionador34Min Max: $bdPosicaoServoDirecionador34Max")
+            Text("Posição Servo Direcionador 34 - Min: ${uiState.posicaoServoDirecionador34Min} Max: ${uiState.posicaoServoDirecionador34Max}")
             AngleCard(
                 label = "Posição Servo Direcionador 34",
                 posicaoMin = posicaoServoDirecionador34Min,
@@ -143,7 +118,7 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             )
 
             // Exibe os valores RGB antes do card
-            Text("RGB Valores - Cor: $bdCor -> R: $bdRValue, G: $bdGValue, B: $bdBValue")
+            Text("RGB Valores - Cor: ${uiState.cor} -> R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
             RGBCard(
                 label = "RGB Valores",
                 R = rValue,
@@ -158,9 +133,6 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
             Button(
                 onClick = {
-                 //   coroutineScope.launch {
-                       // viewModel.manipularMensagemMQTT()
-                      //  viewModel.transformarObjetoJsoneEnviar()
                         if (parametros == null) {
                             viewModel.insert(
                                 posicaoServoPortaMin,
@@ -194,20 +166,6 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                         }
                         viewModel.updateParametrosFromDatabase()
                         viewModel.transformarObjetoJsoneEnviar()
-
-                        //Esperar envio ser concluído pelo viewModel
-                       // delay(100)
-                       // if(mensagemEntregue != null) {
-
-
-                    //Toast.makeText(LocalContext, mensagemEntregue.toString(), Toast.LENGTH_SHORT).show()
-                       // }
-
-
-                //    }
-
-
-
 
                     Log.d("ParametrosUpdate", "Novos parâmetros: ${uiState.posicaoServoPortaMin}")
                 },

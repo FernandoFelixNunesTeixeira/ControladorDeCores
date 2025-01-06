@@ -43,7 +43,11 @@ fun ScaffoldApp(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("Aplicativo") },
+                        title = {
+                            if (state != null) {
+                                Text("${state.title}")
+                            }
+                        },
                         navigationIcon = {
                             IconButton(onClick = {
                                 coroutineScope.launch {

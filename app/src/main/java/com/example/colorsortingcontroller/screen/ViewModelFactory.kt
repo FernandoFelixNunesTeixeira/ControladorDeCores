@@ -3,10 +3,8 @@ package com.example.colorsortingcontroller.screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.colorsortingcontroller.data.EstatisticasRepository
-import com.example.colorsortingcontroller.data.Monitoramento
 import com.example.colorsortingcontroller.data.MonitoramentoRepository
 import com.example.colorsortingcontroller.data.ParametrosRepository
-import com.google.common.util.concurrent.Monitor
 
 class ParametrosViewModelFactory(
     private val parametrosRepository: ParametrosRepository

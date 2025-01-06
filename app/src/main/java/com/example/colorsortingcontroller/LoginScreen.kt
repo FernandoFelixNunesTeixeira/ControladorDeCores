@@ -62,7 +62,6 @@ interface SensorBiometrico {
     fun AutenticacaoBiometria()
 }
 
-
 class LoginScreen : FragmentActivity(), SensorBiometrico {
     private lateinit var auth: FirebaseAuth
 
@@ -78,13 +77,12 @@ class LoginScreen : FragmentActivity(), SensorBiometrico {
         }
 
         Handler(Looper.getMainLooper()).postDelayed({
-            // Depois de 3 segundos, exibe a tela de login
             setContent {
                 ColorSortingControllerTheme {
                     ScaffoldLogin(auth = auth)
                 }
             }
-        }, 3000)  // Tempo de delay (3 segundos)
+        }, 3000)
 
         // Inicializa o biometric prompt
         executor = ContextCompat.getMainExecutor(this)
@@ -120,48 +118,6 @@ class LoginScreen : FragmentActivity(), SensorBiometrico {
     }
 
     override fun AutenticacaoBiometria() {
-
-        //withContext(Dispatchers.IO) {
-
-        //   val biometricManager = BiometricManager.from(applicationContext)
-        /*  when(biometricManager.canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)){
-        BiometricManager.BIOMETRIC_SUCCESS ->
-           // biometricPrompt.authenticate(promptInfo)
-            Log.d("Sensor_Biometrico", "O aplicativo pode utilizar autenticação biométrica")
-            //    Snackbar.make(this, "",  )
-         //   biometricPrompt.authenticate(promptInfo)
-
-        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> //{
-            Log.e(
-                "Sensor_Biometrico",
-                "Nenhum recurso biométrico disponível neste dispositivo."
-            )
-           // Toast.makeText(
-           //     applicationContext, "Nenhum recurso biométrico disponível neste dispositivo.",
-          //      Toast.LENGTH_SHORT
-           // ).show()
-      //  }
-        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> //{
-            Log.e(
-                "Sensor_Biometrico",
-                "Os recursos biométricos não estão disponíveis no momento."
-            )
-         //   Toast.makeText(
-          //      applicationContext, "Os recursos biométricos não estão disponíveis no momento.",
-         //       Toast.LENGTH_SHORT
-          //  ).show()
-       // }
-    //    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-      //      val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply{
-      //          putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-     //               BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-       //     }
-       //     startActivityForResult(enrollIntent, 1)
-       // }
-
-
-
-    } }*/
         biometricPrompt.authenticate(promptInfo)
     }
 }
@@ -224,40 +180,42 @@ fun ScaffoldLogin(auth: FirebaseAuth) {
                     else PasswordVisualTransformation(),
                     modifier = Modifier.padding(top = 16.dp)
                 )
+
                 Button(
                     onClick = {
-                        auth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    // Login bem-sucedido
-                                    Toast.makeText(
-                                        context,
-                                        "Login realizado com sucesso!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                        if (email.isEmpty() || password.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Por favor, preencha ambos os campos de email e senha.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            auth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        // Login bem-sucedido
+                                        Toast.makeText(
+                                            context,
+                                            "Login realizado com sucesso!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
 
-                                    // Redireciona para a tela principal
-                                    val intent = Intent(context, MainActivity::class.java)
-                                    context.startActivity(intent)
-                                } else {
-                                    // Falha no login
-                                    Toast.makeText(
-                                        context,
-                                        "Erro: ${task.exception?.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                        // Chama biometria
+                                        chamadaDeFuncao.AutenticacaoBiometria()
+                                    } else {
+                                        // Falha no login
+                                        Toast.makeText(
+                                            context,
+                                            "Erro: ${task.exception?.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
-                            }
+                        }
                     },
                     modifier = Modifier.padding(top = 32.dp)
                 ) {
                     Text("Entrar")
-                }
-                Button(
-                    onClick = { chamadaDeFuncao.AutenticacaoBiometria() },
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Text("Sensor Biométrico")
                 }
             }
         }
@@ -266,7 +224,6 @@ fun ScaffoldLogin(auth: FirebaseAuth) {
 
 @Composable
 fun LoadingScreen() {
-
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
@@ -285,32 +242,3 @@ fun LoadingScreen() {
         LoginScreen()
     }
 }
-
-
-//class BateriaScreen : FragmentActivity() {
-
-//@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-// override fun quantidadeBateria()  {
-//  val batteryStatus: Intent? = IntentFilter(Intent.ACTION_BATTERY_CHANGED).let { ifilter ->
-//      this.registerReceiver(null
-//      , ifilter)
-
-//   }
-
-
-//  batteryPct = batteryStatus?.let { intent ->
-//     val level: Int = BatteryManager.EXTRA_LEVEL.toInt()
-//      val scale: Int = BatteryManager.EXTRA_SCALE.toInt()
-//      level * 100 / scale.toFloat()
-//  }
-//   return batteryPct
-
-//  }
-//}
-
-
-
-
-
-
-

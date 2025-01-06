@@ -23,8 +23,6 @@ fun LineaPunteada(){
             start = Offset(0f, 0f),
             end = Offset(size.width, 0f),
             pathEffect = efeito
-
         )
-
     }
 }
