@@ -164,68 +164,67 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
 
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
-            while (true) {
-                //Instância do objeto GSON
-                delay(1)
-                //Conversão da mensagem em MQTT contendo uma string json para um objeto json
-                synchronized(this) {
-                if (mensagemMQTT.value != null) {
-                    val objetoJson =
-                        JsonParser.parseString(mensagemMQTT.value).asJsonObject
-                    _stateEstatisticas.value = EstatisticasUiState(
-                        objetoJson.get("PecasSeparadasCor1").asInt,
-                        objetoJson.get("PecasSeparadasCor2").asInt,
-                        objetoJson.get("PecasSeparadasCor3").asInt,
-                        objetoJson.get("PecasSeparadasCor4").asInt,
-                        objetoJson.get("PecasSeparadasCor5").asInt,
-                        objetoJson.get("PecasSeparadasCor6").asInt,
-                        objetoJson.get("PecasSeparadasCor7").asInt,
-                        objetoJson.get("PecasSeparadasCor8").asInt,
-                        objetoJson.get("PecasSeparadasColetor1").asInt,
-                        objetoJson.get("PecasSeparadasColetor2").asInt,
-                        objetoJson.get("PecasSeparadasColetor3").asInt,
-                        objetoJson.get("PecasSeparadasColetor4").asInt
-                    )
-                    if (valorEstatisticasList != null) {
-                        updateEstatisticas(
-                            _stateEstatisticas.value.pecasCor1,
-                            _stateEstatisticas.value.pecasCor2,
-                            _stateEstatisticas.value.pecasCor3,
-                            _stateEstatisticas.value.pecasCor4,
-                            _stateEstatisticas.value.pecasCor5,
-                            _stateEstatisticas.value.pecasCor6,
-                            _stateEstatisticas.value.pecasCor7,
-                            _stateEstatisticas.value.pecasCor8,
-                            _stateEstatisticas.value.pecasColetor1,
-                            _stateEstatisticas.value.pecasColetor2,
-                            _stateEstatisticas.value.pecasColetor3,
-                            _stateEstatisticas.value.pecasColetor4,
-                        )
-                        updateEstatisticasFromDatabase()
-                        sleep(100)
-                    } else {
-                        insertEstatisticas(
-                            _stateEstatisticas.value.pecasCor1,
-                            _stateEstatisticas.value.pecasCor2,
-                            _stateEstatisticas.value.pecasCor3,
-                            _stateEstatisticas.value.pecasCor4,
-                            _stateEstatisticas.value.pecasCor5,
-                            _stateEstatisticas.value.pecasCor6,
-                            _stateEstatisticas.value.pecasCor7,
-                            _stateEstatisticas.value.pecasCor8,
-                            _stateEstatisticas.value.pecasColetor1,
-                            _stateEstatisticas.value.pecasColetor2,
-                            _stateEstatisticas.value.pecasColetor3,
-                            _stateEstatisticas.value.pecasColetor4,
-                        )
-                        updateEstatisticasFromDatabase()
-                        //Garantir que não seja realizado mais de um insert
-                        valorEstatisticasList = MutableStateFlow(1)
 
+                //Conversão da mensagem em MQTT contendo uma string json para um objeto json
+                mensagemMQTT.observeForever { novaMensagem ->
+                    synchronized(this) {
+                        if (novaMensagem != null) {
+                            val objetoJson =
+                                JsonParser.parseString(novaMensagem).asJsonObject
+                            _stateEstatisticas.value = EstatisticasUiState(
+                                objetoJson.get("PecasSeparadasCor1").asInt,
+                                objetoJson.get("PecasSeparadasCor2").asInt,
+                                objetoJson.get("PecasSeparadasCor3").asInt,
+                                objetoJson.get("PecasSeparadasCor4").asInt,
+                                objetoJson.get("PecasSeparadasCor5").asInt,
+                                objetoJson.get("PecasSeparadasCor6").asInt,
+                                objetoJson.get("PecasSeparadasCor7").asInt,
+                                objetoJson.get("PecasSeparadasCor8").asInt,
+                                objetoJson.get("PecasSeparadasColetor1").asInt,
+                                objetoJson.get("PecasSeparadasColetor2").asInt,
+                                objetoJson.get("PecasSeparadasColetor3").asInt,
+                                objetoJson.get("PecasSeparadasColetor4").asInt
+                            )
+                            if (valorEstatisticasList != null) {
+                                updateEstatisticas(
+                                    _stateEstatisticas.value.pecasCor1,
+                                    _stateEstatisticas.value.pecasCor2,
+                                    _stateEstatisticas.value.pecasCor3,
+                                    _stateEstatisticas.value.pecasCor4,
+                                    _stateEstatisticas.value.pecasCor5,
+                                    _stateEstatisticas.value.pecasCor6,
+                                    _stateEstatisticas.value.pecasCor7,
+                                    _stateEstatisticas.value.pecasCor8,
+                                    _stateEstatisticas.value.pecasColetor1,
+                                    _stateEstatisticas.value.pecasColetor2,
+                                    _stateEstatisticas.value.pecasColetor3,
+                                    _stateEstatisticas.value.pecasColetor4,
+                                )
+                                updateEstatisticasFromDatabase()
+                                sleep(100)
+                            } else {
+                                insertEstatisticas(
+                                    _stateEstatisticas.value.pecasCor1,
+                                    _stateEstatisticas.value.pecasCor2,
+                                    _stateEstatisticas.value.pecasCor3,
+                                    _stateEstatisticas.value.pecasCor4,
+                                    _stateEstatisticas.value.pecasCor5,
+                                    _stateEstatisticas.value.pecasCor6,
+                                    _stateEstatisticas.value.pecasCor7,
+                                    _stateEstatisticas.value.pecasCor8,
+                                    _stateEstatisticas.value.pecasColetor1,
+                                    _stateEstatisticas.value.pecasColetor2,
+                                    _stateEstatisticas.value.pecasColetor3,
+                                    _stateEstatisticas.value.pecasColetor4,
+                                )
+                                updateEstatisticasFromDatabase()
+                                //Garantir que não seja realizado mais de um insert
+                                valorEstatisticasList = MutableStateFlow(1)
+
+                            }
+                        }
                     }
                 }
-                }
-            }
         }
     }
 
@@ -271,5 +270,11 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                 }
             }
         }
+    }
+
+    override fun onCleared(){
+        super.onCleared()
+        //Encerrar a conexão
+        mqttHandler.disconnect()
     }
 }

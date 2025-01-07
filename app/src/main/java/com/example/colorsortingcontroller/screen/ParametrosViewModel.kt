@@ -13,6 +13,7 @@ import com.example.colorsortingcontroller.data.ParametrosRepository
 
 import com.example.colorsortingcontroller.network.MQTTHandler
 import com.example.colorsortingcontroller.network.MQTTUiState
+import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,8 +44,8 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
     init {
         getConexao()
-        subscribeToTopic("parametros", 2)
-        subscribeToTopic("parametrosReceber", 2)
+        subscribeToTopic("parametros", 1)
+        subscribeToTopic("parametrosReceber", 1)
         updateParametrosFromDatabase()
         manipularMensagemMQTT()
     }
@@ -116,7 +117,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                         "\"" +  stateParametros.value.gValue.toString() + "\"" + "," +
                         "\"" + "B"  + "\" :" +
                         "\"" +  stateParametros.value.bValue.toString() + "\"" + " }"
-                publishMessage("parametros",  objetoJsonParametros, 2, false )
+                publishMessage("parametros",  objetoJsonParametros, 1, false )
             } catch(e: IOException) {
                 MQTTUiState.Error
             }
@@ -125,20 +126,30 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
     private val _stateParametros = MutableStateFlow(ParametrosUiState())
     val stateParametros: StateFlow<ParametrosUiState> = _stateParametros
-    val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateParametros
+    val mensagemMQTT: LiveData<String?> get() = mqttHandler.mqttStateParametros
     val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
     val mensagemEntregue: LiveData<String> get() = mqttHandler.mqttStateEntregaMensagem
 
      fun manipularMensagemMQTT(){
          viewModelScope.launch {
-             while(true) {
-                 //Instância do objeto GSON
-                 delay(1)
+             val novosParametros = ParametrosUiState()
+
+             //while(true) {
+
+
+               //  delay(1)
                  //Conversão da mensagem em MQTT contendo uma string json para um objeto json
+                 mensagemMQTT.observeForever { novaMensagem ->
                  synchronized(this) {
-                     if (mensagemMQTT.value != null) {
+                     //if (mensagemMQTT.value != null ) {
+
+
+                     if (novaMensagem != null) {
+
+
                          val objetoJson =
-                             JsonParser.parseString(mensagemMQTT.value).asJsonObject
+                             JsonParser.parseString(novaMensagem).asJsonObject
+
                          _stateParametros.value = ParametrosUiState(
                              objetoJson.get("PosicaoServoPortaAnguloMinimo").asInt,
                              objetoJson.get("PosicaoServoPortaAnguloMaximo").asInt,
@@ -153,6 +164,8 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                              objetoJson.get("G").asInt,
                              objetoJson.get("B").asInt
                          )
+
+
                          if (valorParametrosList != null) {
                              update(
                                  _stateParametros.value.posicaoServoPortaMin,
@@ -169,7 +182,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                                  _stateParametros.value.bValue
                              )
                              updateParametrosFromDatabase()
-                            sleep(100)
+                             sleep(100)
                          } else {
                              insert(
                                  _stateParametros.value.posicaoServoPortaMin,
@@ -189,11 +202,15 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
                              //Garantir que não seja realizado mais de um insert
                              valorParametrosList = MutableStateFlow(1)
+                             mqttHandler.mqttStateParametros
+                             //    }
+                             //   }
                          }
                      }
                  }
+                 }
              }
-         }
+        // }
     }
 
     // Recebe todos os valores do repositório
@@ -331,10 +348,17 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                     _stateParametros.value = novosParametros
                     Log.d("ParametrosUpdate", "Novos parâmetros: $novosParametros")
                     valorParametrosList = MutableStateFlow(1)
+                    delay(100)
                 }
 
             }
         }
     }
+
+     override fun onCleared(){
+         super.onCleared()
+         //Encerrar a conexão
+       mqttHandler.disconnect()
+     }
 }
 

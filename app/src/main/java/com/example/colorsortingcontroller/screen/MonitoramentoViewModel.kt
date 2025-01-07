@@ -126,40 +126,39 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
 
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
-            while(true) {
-                //Instância do objeto GSON
-                delay(1)
-                //val gson = Gson()
 
-                synchronized(this) {
-                //Conversão da mensagem em MQTT contendo uma string json para um objeto json
-                if (mensagemMQTT.value != null) {
-                    val objetoJson =
-                        JsonParser.parseString(mensagemMQTT.value).asJsonObject
-                        _stateMonitoramento.value =  MonitoramentoUiState(
-                            objetoJson.get("EstadoAtual").asString,
-                            objetoJson.get("CorAtual").asString
-                        )
-                        if (valorMonitoramentoList != null) {
-                            updateMonitoramento(
-                                _stateMonitoramento.value.estado,
-                                _stateMonitoramento.value.corAtual
-                            )
-                            updateMonitoramentoFromDatabase()
-                            sleep(100)
-                        } else{
-                            insertMonitoramento(
-                                _stateMonitoramento.value.estado,
-                                _stateMonitoramento.value.corAtual
-                            )
-                            updateMonitoramentoFromDatabase()
-                            //Garantir que não seja realizado mais de um insert
-                            valorMonitoramentoList = MutableStateFlow(1)
 
+                mensagemMQTT.observeForever { novaMensagem ->
+                    synchronized(this) {
+                        //Conversão da mensagem em MQTT contendo uma string json para um objeto json
+                        if (novaMensagem != null) {
+                            val objetoJson =
+                                JsonParser.parseString(novaMensagem).asJsonObject
+                            _stateMonitoramento.value = MonitoramentoUiState(
+                                objetoJson.get("EstadoAtual").asString,
+                                objetoJson.get("CorAtual").asString
+                            )
+                            if (valorMonitoramentoList != null) {
+                                updateMonitoramento(
+                                    _stateMonitoramento.value.estado,
+                                    _stateMonitoramento.value.corAtual
+                                )
+                                updateMonitoramentoFromDatabase()
+                                sleep(100)
+                            } else {
+                                insertMonitoramento(
+                                    _stateMonitoramento.value.estado,
+                                    _stateMonitoramento.value.corAtual
+                                )
+                                updateMonitoramentoFromDatabase()
+                                //Garantir que não seja realizado mais de um insert
+                                valorMonitoramentoList = MutableStateFlow(1)
+
+                            }
                         }
                     }
                 }
-            }
+
         }
     }
 
@@ -178,5 +177,11 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
                 }
             }
         }
+    }
+
+    override fun onCleared(){
+        super.onCleared()
+        //Encerrar a conexão
+        mqttHandler.disconnect()
     }
 }

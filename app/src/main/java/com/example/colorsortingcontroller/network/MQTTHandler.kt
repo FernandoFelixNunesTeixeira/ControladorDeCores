@@ -7,8 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import com.example.colorsortingcontroller.MainActivity
@@ -36,11 +39,13 @@ sealed interface MQTTUiState {
   //  fun getInstance(): MQTTHandler
 //}
 
-
-class MQTTHandler: ViewModel(){
-    private var instanciaMQTT : MQTTHandler? = null
+//Verificar posteriormente se será model ou viewModel
+class MQTTHandler {
+   // private var instanciaMQTT : MQTTHandler? = null
 
     private var conexao : Boolean = false
+
+
 
     companion object {
 
@@ -72,8 +77,8 @@ class MQTTHandler: ViewModel(){
     private val _MQTTstateEntregaMensagem = MutableLiveData<String>()
     val mqttStateEntregaMensagem: LiveData<String> get() = _MQTTstateEntregaMensagem
 
-    private val _MQTTstateParametros = MutableLiveData<String>()
-    val mqttStateParametros: LiveData<String> get() = _MQTTstateParametros
+    private val _MQTTstateParametros = MutableLiveData<String?>()
+    val mqttStateParametros: LiveData<String?> get() = _MQTTstateParametros
 
     private val _MQTTstateEstatisticas = MutableLiveData<String>()
     val mqttStateEstatisticas: LiveData<String> get() = _MQTTstateEstatisticas
@@ -109,7 +114,6 @@ class MQTTHandler: ViewModel(){
                     client.setCallback(object : MqttCallbackExtended {
                         override fun connectionLost(cause: Throwable?) {
                             println("Conexão Perdida: ${cause?.message}")
-
                             _MQTTstate.postValue("Desconectado")
                             //  Toast.makeText(context, "Erro de Autenticação: ", Toast.LENGTH_SHORT).show()
                             // MQTTUiState.Error
@@ -121,12 +125,16 @@ class MQTTHandler: ViewModel(){
                             //Comparar mensagem com o tópico esperado
                             synchronized(this) {
                                 if (message != null) {
+
                                     if (topic.equals("parametrosReceber")) {
                                         // val novoValorConexao = ConexaoParametrosUiState(message.toString())
                                         // _state3.value = novoValorConexao
                                         //     mqttUiState = MQTTUiState.MensagemRecebida(message.toString())
                                         _MQTTstateParametros.postValue(String(message.payload))
                                         Thread.sleep(100)
+                                        //Tornar valor nulo porque existe entrada do usuário nessa tela, evitar conflito de forma mais simples
+                                        _MQTTstateParametros.postValue(null)
+
                                     }
 
                                     if (topic.equals("estatisticasReceber")) {
@@ -160,6 +168,8 @@ class MQTTHandler: ViewModel(){
 
                         //Gerenciar conexões completadas
                         override fun connectComplete(reconnect: Boolean, serverURI: String?) {
+
+
                             if (reconnect) {
                                 println("Reconectado ao broker: $serverURI")
                                 _MQTTstate.postValue("Conectado")
@@ -205,12 +215,15 @@ class MQTTHandler: ViewModel(){
     }
 
     //Desconectar do broker
-
+    //Não há necessidade de uso, porque a ideia é reconexão automática, até que o aplicativo seja fechado,
+    //o que já encerrará a conexão
     fun disconnect() {
-        try {
-            client.disconnect()
-        } catch (e: MqttException) {
-            e.printStackTrace()
+        synchronized(this) {
+            try {
+                client.disconnect()
+            } catch (e: MqttException) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -242,11 +255,12 @@ class MQTTHandler: ViewModel(){
     //    private const val TIMEOUT_MILLIS = 5_000L
    // }
 
-    override fun onCleared(){
-        super.onCleared()
-        //Encerrar a conexão
-        disconnect()
-    }
+   // override fun onCleared(){
+   //     super.onCleared()
+   //     //Encerrar a conexão
+   //     disconnect()
+   // }
+
 
 
 

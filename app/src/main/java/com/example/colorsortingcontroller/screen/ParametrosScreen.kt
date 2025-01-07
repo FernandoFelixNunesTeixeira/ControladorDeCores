@@ -34,7 +34,7 @@ import kotlin.coroutines.coroutineContext
 fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
     val parametros by viewModel.parametros.collectAsState(initial = null)
     val uiState by viewModel.stateParametros.collectAsState()
-    val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT")
+   // val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT")
     val conexaoState by viewModel.conexaoMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Desconectado")
     val mensagemEntregue by viewModel.mensagemEntregue.asFlow().collectAsStateWithLifecycle(initialValue = "")
 
@@ -69,12 +69,12 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
         ) {
             // Exibe os valores da uiState
             Text("Estado da conexão: $conexaoState")
-            Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
-            Text("UI State - Posição Servo Direcionador ED Min: ${uiState.posicaoServoDirecionadorEDMin}, Max: ${uiState.posicaoServoDirecionadorEDMax}")
-            Text("UI State - Posição Servo Direcionador 12 Min: ${uiState.posicaoServoDirecionador12Min}, Max: ${uiState.posicaoServoDirecionador12Max}")
-            Text("UI State - Posição Servo Direcionador 34 Min: ${uiState.posicaoServoDirecionador34Min}, Max: ${uiState.posicaoServoDirecionador34Max}")
-            Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
-            Text("Comunicação UI State -  $mensagemMQTT")
+          //  Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
+         //   Text("UI State - Posição Servo Direcionador ED Min: ${uiState.posicaoServoDirecionadorEDMin}, Max: ${uiState.posicaoServoDirecionadorEDMax}")
+         //   Text("UI State - Posição Servo Direcionador 12 Min: ${uiState.posicaoServoDirecionador12Min}, Max: ${uiState.posicaoServoDirecionador12Max}")
+          //  Text("UI State - Posição Servo Direcionador 34 Min: ${uiState.posicaoServoDirecionador34Min}, Max: ${uiState.posicaoServoDirecionador34Max}")
+          //  Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
+          //  Text("Comunicação UI State -  $mensagemMQTT")
             Text("$mensagemEntregue")
 
             // Exibe o valor atual antes dos cards
@@ -227,8 +227,8 @@ fun RGBCard(
     onBChange: (Int) -> Unit,
     onCorChange: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf("Vermelho") }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var selectedColor by rememberSaveable { mutableStateOf(cor) }
 
     val colorOptions = listOf("Vermelho", "Verde", "Azul", "Amarelo", "Roxo")
 
@@ -253,7 +253,7 @@ fun RGBCard(
                 ) {
                     OutlinedTextField(
                         value = selectedColor,
-                        onValueChange = {},
+                        onValueChange = {selectedColor = cor},
                         readOnly = true,
                         label = { Text("Selecione uma cor:") },
                         colors = OutlinedTextFieldDefaults.colors(
