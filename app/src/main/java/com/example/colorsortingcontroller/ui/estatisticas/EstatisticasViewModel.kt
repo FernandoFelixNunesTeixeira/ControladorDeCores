@@ -1,33 +1,26 @@
-package com.example.colorsortingcontroller.screen
+package com.example.colorsortingcontroller.estatisticas
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.colorsortingcontroller.data.Estatisticas
-import com.example.colorsortingcontroller.data.EstatisticasRepository
-import com.example.colorsortingcontroller.data.Monitoramento
-import com.example.colorsortingcontroller.data.MonitoramentoRepository
-
+import com.example.colorsortingcontroller.ScreenState
+import com.example.colorsortingcontroller.data.repository.EstatisticasRepository
 import com.example.colorsortingcontroller.network.MQTTHandler
-import com.example.colorsortingcontroller.network.MQTTUiState
-import com.example.colorsortingcontroller.screen.MonitoramentoViewModel.MonitoramentoUiState
-import com.example.colorsortingcontroller.screen.ParametrosViewModel.ParametrosUiState
+
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.lang.Thread.sleep
+import java.util.UUID
 
-private val BROKER_URL = "ssl://77e0591acd6d4fb0b4cb6da7dc26b87b.s1.eu.hivemq.cloud:8883"
-private val CLIENT_ID = "Android_ClientTestando"
+private val BROKER_URL = "ssl://4b5548dcb4844ac9bd65c4373c6b8537.s1.eu.hivemq.cloud:8883"
+private val CLIENT_ID = UUID.randomUUID().toString()
 
 private lateinit var mqttHandler: MQTTHandler
 
@@ -35,16 +28,19 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     private val _state = MutableStateFlow(ScreenState.estatisticas)
     val state: StateFlow<ScreenState> = _state
 
-    //val para impedir mudanças indesejáveis na variável
+    //variável para controlar insert e updates no banco de dados
     private var valorEstatisticasList : MutableStateFlow<Int>? = null
 
     init {
         getConexao()
+        updateEstatisticasFromDatabase()
         subscribeToTopic("estatisticas", 1)
         subscribeToTopic("estatisticasReceber", 1)
-        updateEstatisticasFromDatabase()
+        subscribeToTopic("novasEstatisticas", 1)
+        enviarSolicitacao()
         manipularMensagemMQTT()
     }
+
     // Envia a lista de monitoramento para a UI
     val estatisticas = estatisticasRepository.allEstatisticas.map { list ->
         list.firstOrNull()
@@ -59,7 +55,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         pecasCor5: Int,
         pecasCor6: Int,
         pecasCor7: Int,
-        pecasCor8: Int,
+
 
         pecasColetor1: Int,
         pecasColetor2: Int,
@@ -75,8 +71,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                 pecasCor4 = pecasCor4,
                 pecasCor5 = pecasCor5,
                 pecasCor6 = pecasCor6,
-                pecasCor7 = pecasCor7,
-                pecasCor8 = pecasCor8
+                pecasCor7 = pecasCor7
             )
             estatisticasRepository.updatePecasColetor(
                 pecasColetor1 = pecasColetor1,
@@ -89,7 +84,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
 
     // Função DELETE
     fun deleteEstatisticas(id: Int)= viewModelScope.launch {
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             estatisticasRepository.deleteEstatisticas(id)
         }
     }
@@ -103,14 +98,14 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         pecasCor5: Int,
         pecasCor6: Int,
         pecasCor7: Int,
-        pecasCor8: Int,
+
 
         pecasColetor1: Int,
         pecasColetor2: Int,
         pecasColetor3: Int,
         pecasColetor4: Int
     ) = viewModelScope.launch {
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             estatisticasRepository.insertEstatisticas(
                 pecasCor1,
                 pecasCor2,
@@ -119,7 +114,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                 pecasCor5,
                 pecasCor6,
                 pecasCor7,
-                pecasCor8,
                 pecasColetor1,
                 pecasColetor2,
                 pecasColetor3,
@@ -131,6 +125,10 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
+
+
+
+
     fun getConexao() {
         viewModelScope.launch {
             try {
@@ -139,8 +137,9 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                 mqttHandler.connect(BROKER_URL, CLIENT_ID)
 
 
-            } catch (e: IOException) {
-                MQTTUiState.Error
+
+            } catch (e: Throwable) {
+                e.printStackTrace()
             }
         }
     }
@@ -150,8 +149,8 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
             try {
                 mqttHandler.subscribe(topic, nivelQos);
 
-            } catch (e: IOException) {
-                MQTTUiState.Error
+            } catch (e: Throwable) {
+                e.printStackTrace()
             }
         }
     }
@@ -162,12 +161,13 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateEstatisticas
     val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
 
+    var tempoEspera = System.currentTimeMillis()
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
-
-                //Conversão da mensagem em MQTT contendo uma string json para um objeto json
-                mensagemMQTT.observeForever { novaMensagem ->
-                    synchronized(this) {
+                try {
+                    //Conversão da mensagem em MQTT contendo uma string json para um objeto json
+                    mensagemMQTT.observeForever { novaMensagem ->
+                     //Não tem entrada de usuário
                         if (novaMensagem != null) {
                             val objetoJson =
                                 JsonParser.parseString(novaMensagem).asJsonObject
@@ -179,7 +179,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                                 objetoJson.get("PecasSeparadasCor5").asInt,
                                 objetoJson.get("PecasSeparadasCor6").asInt,
                                 objetoJson.get("PecasSeparadasCor7").asInt,
-                                objetoJson.get("PecasSeparadasCor8").asInt,
+                              
                                 objetoJson.get("PecasSeparadasColetor1").asInt,
                                 objetoJson.get("PecasSeparadasColetor2").asInt,
                                 objetoJson.get("PecasSeparadasColetor3").asInt,
@@ -194,14 +194,12 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                                     _stateEstatisticas.value.pecasCor5,
                                     _stateEstatisticas.value.pecasCor6,
                                     _stateEstatisticas.value.pecasCor7,
-                                    _stateEstatisticas.value.pecasCor8,
                                     _stateEstatisticas.value.pecasColetor1,
                                     _stateEstatisticas.value.pecasColetor2,
                                     _stateEstatisticas.value.pecasColetor3,
                                     _stateEstatisticas.value.pecasColetor4,
                                 )
                                 updateEstatisticasFromDatabase()
-                                sleep(100)
                             } else {
                                 insertEstatisticas(
                                     _stateEstatisticas.value.pecasCor1,
@@ -211,19 +209,18 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                                     _stateEstatisticas.value.pecasCor5,
                                     _stateEstatisticas.value.pecasCor6,
                                     _stateEstatisticas.value.pecasCor7,
-                                    _stateEstatisticas.value.pecasCor8,
+
                                     _stateEstatisticas.value.pecasColetor1,
                                     _stateEstatisticas.value.pecasColetor2,
                                     _stateEstatisticas.value.pecasColetor3,
                                     _stateEstatisticas.value.pecasColetor4,
                                 )
-                                updateEstatisticasFromDatabase()
-                                //Garantir que não seja realizado mais de um insert
-                                valorEstatisticasList = MutableStateFlow(1)
-
                             }
                         }
+
                     }
+                } catch(e: Throwable){
+                    e.printStackTrace()
                 }
         }
     }
@@ -236,13 +233,39 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         var pecasCor5: Int = 0,
         var pecasCor6: Int = 0,
         var pecasCor7: Int = 0,
-        var pecasCor8: Int = 0,
-
         var pecasColetor1: Int = 0,
         var pecasColetor2: Int = 0,
         var pecasColetor3: Int = 0,
         var pecasColetor4: Int = 0
     )
+
+    fun publishMessage(topic: String, message: String, nivelQos: Int, retainedFlag: Boolean) {
+        viewModelScope.launch{
+            try {
+                //  Colocar Toast indicando que mensagem foi enviada na view
+                mqttHandler.publish(topic, message, nivelQos, retainedFlag)
+
+
+
+
+            } catch(e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun enviarSolicitacao(){
+        viewModelScope.launch{
+            try {
+                publishMessage("novasEstatisticas", "Envie estatisticas", 1, false )
+            } catch(e: IOException) {
+                e.printStackTrace()
+            } catch(e: Throwable) {
+                e.printStackTrace()
+            }
+
+        }
+    }
 
     fun updateEstatisticasFromDatabase() {
         viewModelScope.launch {
@@ -257,7 +280,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                         pecasCor5 = estatisticasList[0].pecasCor5,
                         pecasCor6 = estatisticasList[0].pecasCor6,
                         pecasCor7 = estatisticasList[0].pecasCor7,
-                        pecasCor8 = estatisticasList[0].pecasCor8,
+
 
                         pecasColetor1 = estatisticasList[0].pecasColetor1,
                         pecasColetor2 = estatisticasList[0].pecasColetor2,

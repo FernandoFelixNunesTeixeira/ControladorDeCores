@@ -1,4 +1,4 @@
-package com.example.colorsortingcontroller.ui.theme
+package com.example.colorsortingcontroller.theme
 
 import androidx.compose.ui.graphics.Color
 

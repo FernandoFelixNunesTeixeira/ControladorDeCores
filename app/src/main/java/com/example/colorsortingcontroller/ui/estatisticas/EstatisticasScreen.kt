@@ -1,4 +1,4 @@
-package com.example.colorsortingcontroller.screen
+package com.example.colorsortingcontroller.estatisticas
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
@@ -6,13 +6,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.colorsortingcontroller.model.Datos
 import com.example.colorsortingcontroller.screen.graphs.MascotaStatsScreen
+import com.example.colorsortingcontroller.theme.ColorSortingControllerTheme
 
 // Tela de Estatísticas
 @Composable
@@ -42,7 +42,7 @@ fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
                 ) {
                     Text(text = "Peças separadas por cor: " +
                             "1: [${uiState.pecasCor1}] 2: [${uiState.pecasCor2}] 3: [${uiState.pecasCor3}] 4: [${uiState.pecasCor4}] " +
-                            "5: [${uiState.pecasCor5}] 6: [${uiState.pecasCor6}] 7: [${uiState.pecasCor7}] 8: [${uiState.pecasCor8}]")
+                            "5: [${uiState.pecasCor5}] 6: [${uiState.pecasCor6}] 7: [${uiState.pecasCor7}]")
                 }
             }
             Card(
@@ -68,7 +68,7 @@ fun EstatisticasScreen(viewModel: EstatisticasViewModel = viewModel()) {
                 Datos("Cor 5", uiState.pecasCor5 ?: 0),
                 Datos("Cor 6", uiState.pecasCor6 ?: 0),
                 Datos("Cor 7", uiState.pecasCor7 ?: 0),
-                Datos("Cor 8", uiState.pecasCor8 ?: 0)
+               // Datos("Cor 8", uiState.pecasCor8 ?: 0)
             ), pecasPorColetor = listOf(
                 Datos("Coletor 1", uiState.pecasColetor1 ?: 0),
                 Datos("Coletor 2", uiState.pecasColetor2 ?: 0),

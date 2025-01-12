@@ -1,10 +1,27 @@
-package com.example.colorsortingcontroller.screen
+package com.example.colorsortingcontroller
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.colorsortingcontroller.data.EstatisticasRepository
-import com.example.colorsortingcontroller.data.MonitoramentoRepository
-import com.example.colorsortingcontroller.data.ParametrosRepository
+import com.example.colorsortingcontroller.data.repository.EstatisticasRepository
+import com.example.colorsortingcontroller.data.repository.MonitoramentoRepository
+import com.example.colorsortingcontroller.data.repository.ParametrosRepository
+import com.example.colorsortingcontroller.estatisticas.EstatisticasViewModel
+import com.example.colorsortingcontroller.monitoramento.MonitoramentoViewModel
+import com.example.colorsortingcontroller.parametros.ParametrosViewModel
+import com.example.colorsortingcontroller.ui.home.HomeViewModel
+import com.google.firebase.auth.FirebaseAuth
+
+class HomeViewModelFactory(private val auth: FirebaseAuth) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return when {
+            modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
+                @Suppress("UNCHECKED_CAST")
+                HomeViewModel(auth) as T
+            }
+            else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+        }
+    }
+}
 
 class ParametrosViewModelFactory(
     private val parametrosRepository: ParametrosRepository

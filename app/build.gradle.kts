@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.recyclerview)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -98,13 +99,7 @@ dependencies {
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
 
-    //Retrofit with Scalar Converter
-    //implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-   // implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
-    //implementation("com.squareup.okhttp3:okhttp:4.11.0")
 
-    // Kotlin serialization
-    //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
     //ViewModel
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")

@@ -1,4 +1,4 @@
-package com.example.colorsortingcontroller.screen
+package com.example.colorsortingcontroller
 
 enum class ScreenState(val title: String) {
     monitoramento("Monitoramento"),

@@ -47,7 +47,7 @@ fun Barras(pecasPorCor: List<Datos>) {
         Color(0xFF680EB7), // Cor 5
         Color(0xFFE76B19), // Cor 6
         Color(0xFFEC23E9), // Cor 7
-        Color(0xBE1BDEE5)  // Cor 8
+        //Color(0xBE1BDEE5)  // Cor 8
     )
 
     pecasPorCor.mapIndexed { index, datos ->
@@ -72,35 +72,3 @@ fun Barras(pecasPorCor: List<Datos>) {
     LineaPunteada()
 }
 
-@Composable
-fun BarrasColetor(pecasPorColetor: List<Datos>) {
-    val barras = ArrayList<BarChartData.Bar>()
-
-    val cores = listOf(
-        Color(0xFFCC0606), // Cor 1
-        Color(0xFF1C62DE), // Cor 2
-        Color(0xFF21B300), // Cor 3
-        Color(0xFFDACF03), // Cor 4
-    )
-
-    pecasPorColetor.mapIndexed { index, datos ->
-        barras.add(
-            BarChartData.Bar(
-                label = datos.label,
-                value = datos.value.toFloat(),
-                color = cores.getOrNull(index) ?: Color.Gray
-            )
-        )
-    }
-
-    BarChart(
-        barChartData = BarChartData(bars = barras),
-        modifier = Modifier
-            .padding(horizontal = 30.dp, vertical = 80.dp)
-            .height(300.dp),
-        labelDrawer = SimpleValueDrawer(
-            drawLocation = SimpleValueDrawer.DrawLocation.XAxis
-        )
-    )
-    LineaPunteada()
-}

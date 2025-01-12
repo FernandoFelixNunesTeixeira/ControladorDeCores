@@ -1,4 +1,4 @@
-package com.example.colorsortingcontroller
+package com.example.colorsortingcontroller.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,9 +15,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.colorsortingcontroller.screen.ScreenState
+import com.example.colorsortingcontroller.ScreenState
+import com.example.colorsortingcontroller.theme.ColorSortingControllerTheme
 import kotlinx.coroutines.launch
-import com.example.colorsortingcontroller.ui.theme.ColorSortingControllerTheme
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

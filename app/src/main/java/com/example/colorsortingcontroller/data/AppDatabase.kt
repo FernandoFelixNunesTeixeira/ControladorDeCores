@@ -4,20 +4,27 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import kotlinx.coroutines.CoroutineScope
+import com.example.colorsortingcontroller.data.dao.EstatisticasDao
+import com.example.colorsortingcontroller.data.dao.MonitoramentoDao
+import com.example.colorsortingcontroller.data.dao.ParametrosDao
+import com.example.colorsortingcontroller.data.entities.Estatisticas
+import com.example.colorsortingcontroller.data.entities.Monitoramento
+import com.example.colorsortingcontroller.data.entities.Parametros
 
-@Database(entities = [Monitoramento::class, Parametros::class, Estatisticas::class], version = 1, exportSchema = false)
+@Database(entities = [Monitoramento::class, Parametros::class, Estatisticas::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun appDao(): AppDao
+    abstract fun parametrosDao(): ParametrosDao
+    abstract fun monitoramentoDao(): MonitoramentoDao
+    abstract fun estatisticasDao(): EstatisticasDao
 
     companion object {
         @Volatile
         private var Instance: AppDatabase? = null
 
         fun getDatabase(
-            context: Context,
-            //applicationScope: CoroutineScope
+            context: Context
+
         ): AppDatabase {
 
             return Instance ?: synchronized(this) {
@@ -29,9 +36,8 @@ abstract class AppDatabase : RoomDatabase() {
                 ).fallbackToDestructiveMigration()
                     .build()
 
-                    //.also{ Instance = it}
                 Instance = instance
-                // return instance
+
                 instance
             }
         }

@@ -1,5 +1,7 @@
-package com.example.colorsortingcontroller.data
+package com.example.colorsortingcontroller.data.repository
 
+import com.example.colorsortingcontroller.data.entities.Estatisticas
+import com.example.colorsortingcontroller.data.localSource.EstatisticasLocalSource
 import kotlinx.coroutines.flow.Flow
 
 class EstatisticasRepository(private val estatisticasSource: EstatisticasLocalSource){
@@ -13,7 +15,7 @@ class EstatisticasRepository(private val estatisticasSource: EstatisticasLocalSo
         pecasCor5: Int,
         pecasCor6: Int,
         pecasCor7: Int,
-        pecasCor8: Int,
+
 
         pecasColetor1: Int,
         pecasColetor2: Int,
@@ -28,7 +30,6 @@ class EstatisticasRepository(private val estatisticasSource: EstatisticasLocalSo
             pecasCor5,
             pecasCor6,
             pecasCor7,
-            pecasCor8,
             pecasColetor1,
             pecasColetor2,
             pecasColetor3,
@@ -44,7 +45,7 @@ class EstatisticasRepository(private val estatisticasSource: EstatisticasLocalSo
         pecasCor5: Int,
         pecasCor6: Int,
         pecasCor7: Int,
-        pecasCor8: Int
+
     ){
         estatisticasSource.updatePecasCor1(pecasCor1 = pecasCor1)
         estatisticasSource.updatePecasCor2(pecasCor2 = pecasCor2)
@@ -53,7 +54,6 @@ class EstatisticasRepository(private val estatisticasSource: EstatisticasLocalSo
         estatisticasSource.updatePecasCor5(pecasCor5 = pecasCor5)
         estatisticasSource.updatePecasCor6(pecasCor6 = pecasCor6)
         estatisticasSource.updatePecasCor7(pecasCor7 = pecasCor7)
-        estatisticasSource.updatePecasCor8(pecasCor8 = pecasCor8)
     }
 
     suspend fun updatePecasColetor(

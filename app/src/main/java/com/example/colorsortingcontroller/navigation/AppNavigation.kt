@@ -4,17 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.example.colorsortingcontroller.screen.EstatisticasViewModel
-import com.example.colorsortingcontroller.screen.MonitoramentoViewModel
-import com.example.colorsortingcontroller.screen.ParametrosViewModel
-import com.example.colorsortingcontroller.ScaffoldApp
-import com.example.colorsortingcontroller.screen.EstatisticasScreen
-import com.example.colorsortingcontroller.screen.MonitoramentoScreen
-import com.example.colorsortingcontroller.screen.ParametrosScreen
-import com.example.colorsortingcontroller.screen.ScreenState
+import com.example.colorsortingcontroller.estatisticas.EstatisticasViewModel
+import com.example.colorsortingcontroller.monitoramento.MonitoramentoViewModel
+import com.example.colorsortingcontroller.parametros.ParametrosViewModel
+import com.example.colorsortingcontroller.estatisticas.EstatisticasScreen
+import com.example.colorsortingcontroller.monitoramento.MonitoramentoScreen
+import com.example.colorsortingcontroller.parametros.ParametrosScreen
+import com.example.colorsortingcontroller.ScreenState
+import com.example.colorsortingcontroller.ui.ScaffoldApp
 
 @Composable
 fun AppNavigation(
@@ -31,7 +30,6 @@ fun AppNavigation(
             state = monitoramentoViewModel.state.collectAsState().value,
             onScreenChange = { currentScreen = it }
         ) {
-
             MonitoramentoScreen()
         }
 
