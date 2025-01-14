@@ -47,7 +47,6 @@ fun Barras(pecasPorCor: List<Datos>) {
         Color(0xFF680EB7), // Cor 5
         Color(0xFFE76B19), // Cor 6
         Color(0xFFEC23E9), // Cor 7
-        //Color(0xBE1BDEE5)  // Cor 8
     )
 
     pecasPorCor.mapIndexed { index, datos ->

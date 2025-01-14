@@ -12,7 +12,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 
 
-//Verificar posteriormente se será model ou viewModel
+
 class MQTTHandler {
 
 
@@ -79,12 +79,13 @@ class MQTTHandler {
                         }
 
                     //
-                    client.setCallback(object : MqttCallbackExtended {
-                        override fun connectionLost(cause: Throwable?) {
-                            println("Conexão Perdida: ${cause?.message}")
-                            _MQTTstate.postValue("Desconectado")
+                            client.setCallback(object : MqttCallbackExtended {
 
-                        }
+
+                                override fun connectionLost(cause: Throwable?) {
+                                    println("Conexão Perdida: ${cause?.message}")
+                                    _MQTTstate.postValue("Desconectado")
+                                    }
 
 
                         override fun messageArrived(topic: String?, message: MqttMessage?) {
