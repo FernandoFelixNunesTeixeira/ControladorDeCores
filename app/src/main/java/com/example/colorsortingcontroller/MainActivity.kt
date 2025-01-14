@@ -35,6 +35,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Instanciação do Database e suas dependências
+
         val database = AppDatabase.getDatabase(applicationContext)
 
         val monitoramentoDao: MonitoramentoDao = database.monitoramentoDao()
@@ -49,6 +51,7 @@ class MainActivity : ComponentActivity() {
         val parametrosRepository = ParametrosRepository(parametrosSource)
         val estatisticasRepository = EstatisticasRepository(estatisticasSource)
 
+        // Factory
         setContent {
             MaterialTheme {
                 val parametrosViewModel: ParametrosViewModel = remember {
@@ -72,6 +75,7 @@ class MainActivity : ComponentActivity() {
                     ).get(EstatisticasViewModel::class.java)
                 }
 
+                // Iniciação do AppNavigation para a mudança das telas utilizando ScreenState e ScaffoldApp
                 AppNavigation(
                     monitoramentoViewModel = monitoramentoViewModel,
                     parametrosViewModel = parametrosViewModel,
@@ -85,7 +89,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         finishAffinity()
-        //Necessário para impedir problemas relacionados com o envio e recebimento de mensagens
+        // Necessário para impedir problemas relacionados com o envio e recebimento de mensagens
         // ao clicar no botão voltar
         exitProcess(0)
     }

@@ -1,4 +1,4 @@
-package com.example.colorsortingcontroller.screen.graphs
+package com.example.colorsortingcontroller.ui.graphs
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,13 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun LineaPunteada(){
+fun LinhaPontilhada(){
     val efeito = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     Canvas(
         modifier = Modifier.fillMaxWidth().height(1.dp)

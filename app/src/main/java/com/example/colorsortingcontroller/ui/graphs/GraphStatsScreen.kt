@@ -11,13 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.colorsortingcontroller.model.Datos
+import com.example.colorsortingcontroller.model.Dados
+import com.example.colorsortingcontroller.ui.graphs.LinhaPontilhada
 import com.github.tehras.charts.bar.BarChart
 import com.github.tehras.charts.bar.BarChartData
 import com.github.tehras.charts.bar.renderer.label.SimpleValueDrawer
 
 @Composable
-fun MascotaStatsScreen(pecasPorCor: List<Datos>, pecasPorColetor: List<Datos>) {
+fun GraphStatsScreen(pecasPorCor: List<Dados>, pecasPorColetor: List<Dados>) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
@@ -36,7 +37,7 @@ fun MascotaStatsScreen(pecasPorCor: List<Datos>, pecasPorColetor: List<Datos>) {
 }
 
 @Composable
-fun Barras(pecasPorCor: List<Datos>) {
+fun Barras(pecasPorCor: List<Dados>) {
     val barras = ArrayList<BarChartData.Bar>()
 
     val cores = listOf(
@@ -68,6 +69,6 @@ fun Barras(pecasPorCor: List<Datos>) {
             drawLocation = SimpleValueDrawer.DrawLocation.XAxis
         )
     )
-    LineaPunteada()
+    LinhaPontilhada()
 }
 

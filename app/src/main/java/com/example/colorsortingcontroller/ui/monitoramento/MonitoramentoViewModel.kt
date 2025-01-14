@@ -19,9 +19,8 @@ import java.io.IOException
 import java.util.UUID
 
 private val BROKER_URL = "ssl://4b5548dcb4844ac9bd65c4373c6b8537.s1.eu.hivemq.cloud:8883"
-private val CLIENT_ID = UUID.randomUUID().toString()//Praticamente impossível gerar id repetido
-//Melhor do que passar login do usuário, porque assim permite que uma mesma conta, logue ao mesmo tempo
-//em dois dispositivos diferentes
+private val CLIENT_ID = UUID.randomUUID().toString()// Aleatorizar ID
+// Permite que uma mesma conta logue ao mesmo tempo em dois dispositivos diferentes
 private lateinit var mqttHandler: MQTTHandler
 
 class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoRepository) : ViewModel() {
@@ -32,15 +31,12 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
     private var valorMonitoramentoList : MutableStateFlow<Int>? = null
 
     init {
-
         getConexao()
         updateMonitoramentoFromDatabase()
         subscribeToTopic("monitoramento", 1)
         subscribeToTopic("monitoramentoReceber", 1)
         manipularMensagemMQTT()
     }
-
-
 
     // Envia a lista de monitoramento para a UI
     val monitoramento = monitoramentoRepository.allMonitoramento.map { list ->
@@ -85,7 +81,6 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
             monitoramentoRepository.updateColetorAtual(
                 coletorAtual = coletorAtual
             )
-
         }
     }
 
@@ -147,7 +142,6 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
         }
     }
 
-
     private val _stateMonitoramento = MutableStateFlow(MonitoramentoUiState())
     val stateMonitoramento: StateFlow<MonitoramentoUiState> = _stateMonitoramento
 
@@ -156,15 +150,11 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
 
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
-
             try {
-
                 mensagemMQTT.observeForever { novaMensagem ->
-
                     //Conversão da mensagem em MQTT contendo uma string json para um objeto json
                     if (novaMensagem != null) {
                         //Não tem entrada de usuário
-
                         val objetoJson =
                             JsonParser.parseString(novaMensagem).asJsonObject
                         _stateMonitoramento.value = MonitoramentoUiState(
@@ -196,9 +186,6 @@ class MonitoramentoViewModel(private val monitoramentoRepository: MonitoramentoR
                                 _stateMonitoramento.value.portaAberta,
                                 _stateMonitoramento.value.coletorAtual,
                             )
-
-
-
                         }
                     }
                 }

@@ -48,9 +48,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
     var isLoading by remember { mutableStateOf(false) }
 
     val loginState by viewModel.loginState.observeAsState("")
-    val loginState2 by viewModel.loginState2.observeAsState("")
-
-
+    val biometricState by viewModel.biometricState.observeAsState("")
 
     LaunchedEffect(loginState){
         if(loginState != "" && loginState.isNotBlank()) {
@@ -71,33 +69,23 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
 
             viewModel.AutenticacaoBiometria()
         } }
-
-
     }
 
-    LaunchedEffect(loginState2){
-        if(loginState2 != "" && loginState.isNotBlank()) {
+    LaunchedEffect(biometricState){
+        if(biometricState != "" && loginState.isNotBlank()) {
 
             Toast.makeText(
                 context,
-                loginState2,
+                biometricState,
                 Toast.LENGTH_SHORT
             ).show()
 
             isLoading = true
 
-            if(loginState2 != "Autenticação: realizada com sucesso!!!" ) {
-                // Iniciar autenticação biométrica
+            if(biometricState != "Autenticação realizada com sucesso!" ) {
                 isLoading = false
-
-                //viewModel.AutenticacaoBiometria()
             }
         }
-
-
-
-
-
     }
 
     ColorSortingControllerTheme {
@@ -152,6 +140,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                     modifier = Modifier.padding(top = 16.dp)
                 )
 
+                // Botão de Login
                 Button(
                     onClick = {
                         if (email.isEmpty() || password.isEmpty()) {
@@ -161,19 +150,12 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
-
                             isLoading = true
                             viewModel.autenticacaoFirebase(email, password)
 
-
                             viewModel.resetString()
-
-
-
-
                         }
                         },
-
                     modifier = Modifier.padding(top = 32.dp)
                 ) {
                     Text("Entrar")

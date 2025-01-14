@@ -31,7 +31,7 @@ private val LightColorScheme = lightColorScheme(
     background = LightBackground,
     surface = LightSurface,
     onPrimary = Color.White,
-    onSecondary = Color.White,
+    onSecondary = Color.Black,
     onTertiary = Color.Black,
     onBackground = LightPrimary,
     onSurface = Color.White
@@ -40,7 +40,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun ColorSortingControllerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

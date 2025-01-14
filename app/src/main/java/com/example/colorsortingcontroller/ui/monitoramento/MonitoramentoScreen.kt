@@ -147,8 +147,6 @@ fun MonitoramentoScreen(viewModel: MonitoramentoViewModel = viewModel()) {
                 ) {
                     Text(text = "Coletor Atual: ${uiState.coletorAtual}")
                 }
-
-
             }
         }
     }

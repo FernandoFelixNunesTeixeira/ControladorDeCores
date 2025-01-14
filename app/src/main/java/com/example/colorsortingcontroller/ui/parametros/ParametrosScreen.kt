@@ -27,9 +27,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
-    val parametros by viewModel.parametros.collectAsState(initial = null)
     val uiState by viewModel.stateParametros.collectAsState()
-
 
    // val mensagemMQTT by viewModel.mensagemMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Esperando mensagem MQTT")
     val conexaoState by viewModel.conexaoMQTT.asFlow().collectAsStateWithLifecycle(initialValue = "Desconectado")
@@ -37,7 +35,6 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
 
     // Variáveis para INPUT
     val coroutineScope = rememberCoroutineScope()
-
 
     var posicaoServoPortaMin by rememberSaveable { mutableStateOf(uiState.posicaoServoPortaMin.toString()) }
     var posicaoServoPortaMax by rememberSaveable { mutableStateOf(uiState.posicaoServoPortaMax.toString()) }
@@ -75,7 +72,6 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
     var gValue4 by rememberSaveable { mutableStateOf(uiState.GCor4.toString()) }
     var bValue4 by rememberSaveable { mutableStateOf(uiState.BCor4.toString()) }
 
-
     var rValue5 by rememberSaveable { mutableStateOf(uiState.RCor5.toString()) }
     var gValue5 by rememberSaveable { mutableStateOf(uiState.GCor5.toString()) }
     var bValue5 by rememberSaveable { mutableStateOf(uiState.BCor5.toString()) }
@@ -89,7 +85,8 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
     var bValue7 by rememberSaveable { mutableStateOf(uiState.BCor7.toString()) }
 
 
-    val validoOuNao by remember(  posicaoServoPortaMin,
+    val validoOuNao by remember(
+        posicaoServoPortaMin,
         posicaoServoPortaMax,
         posicaoServoDirecionadorEDMin,
         posicaoServoDirecionadorEDMax,
@@ -126,14 +123,14 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
         bValue7,
         corColetor7) { derivedStateOf{
         viewModel.validateInput(
-            posicaoServoPortaMin.toString(),
-            posicaoServoPortaMax.toString(),
-            posicaoServoDirecionadorEDMin.toString(),
-            posicaoServoDirecionadorEDMax.toString(),
-            posicaoServoDirecionador12Min.toString(),
-            posicaoServoDirecionador12Max.toString(),
-            posicaoServoDirecionador34Min.toString(),
-            posicaoServoDirecionador34Max.toString(),
+            posicaoServoPortaMin,
+            posicaoServoPortaMax,
+            posicaoServoDirecionadorEDMin,
+            posicaoServoDirecionadorEDMax,
+            posicaoServoDirecionador12Min,
+            posicaoServoDirecionador12Max,
+            posicaoServoDirecionador34Min,
+            posicaoServoDirecionador34Max,
             rValue1,
             gValue1,
             bValue1,
@@ -162,12 +159,9 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             gValue7,
             bValue7,
             corColetor7
-
-
         )
     }
     }
-
 
     val scrollState = rememberScrollState()
 
@@ -180,12 +174,6 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
         ) {
             // Exibe os valores da uiState
             Text("Estado da conexão: $conexaoState")
-          //  Text("UI State - Posição Servo Porta Min: ${uiState.posicaoServoPortaMin}, Max: ${uiState.posicaoServoPortaMax}")
-         //   Text("UI State - Posição Servo Direcionador ED Min: ${uiState.posicaoServoDirecionadorEDMin}, Max: ${uiState.posicaoServoDirecionadorEDMax}")
-         //   Text("UI State - Posição Servo Direcionador 12 Min: ${uiState.posicaoServoDirecionador12Min}, Max: ${uiState.posicaoServoDirecionador12Max}")
-          //  Text("UI State - Posição Servo Direcionador 34 Min: ${uiState.posicaoServoDirecionador34Min}, Max: ${uiState.posicaoServoDirecionador34Max}")
-          //  Text("UI State - Cor: ${uiState.cor}, R: ${uiState.rValue}, G: ${uiState.gValue}, B: ${uiState.bValue}")
-          //  Text("Comunicação UI State -  $mensagemMQTT")
             Text("$mensagemEntregue")
 
             // Exibe o valor atual antes dos cards
@@ -239,6 +227,8 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
             RGBCard(
                 label = "RGB Valores",
 
+                // Valores RGB de cada cor e coletor
+
                 RCor1 = rValue1,
                 GCor1 = gValue1,
                 BCor1 = bValue1,
@@ -267,38 +257,35 @@ fun ParametrosScreen(viewModel: ParametrosViewModel = viewModel()) {
                 GCor7 = gValue7,
                 BCor7 = bValue7,
                 coletorCor7 = corColetor7,
-
                 onR1Change = { rValue1 = it},
-            onG1Change = { gValue1 = it },
-            onB1Change = { bValue1 = it },
-            onCorColetor1Change = { corColetor1 = it },
+                onG1Change = { gValue1 = it },
+                onB1Change = { bValue1 = it },
+                onCorColetor1Change = { corColetor1 = it },
 
-            onR2Change = { rValue2 = it},
-            onG2Change = { gValue2 = it},
-            onB2Change = { bValue2 = it},
-            onCorColetor2Change = { corColetor2 = it },
+                onR2Change = { rValue2 = it},
+                onG2Change = { gValue2 = it},
+                onB2Change = { bValue2 = it},
+                onCorColetor2Change = { corColetor2 = it },
 
-            onR3Change = { rValue3 = it},
-            onG3Change = { gValue3 = it},
-            onB3Change = { bValue3 = it},
-            onCorColetor3Change = { corColetor3 = it },
+                onR3Change = { rValue3 = it},
+                onG3Change = { gValue3 = it},
+                onB3Change = { bValue3 = it},
+                onCorColetor3Change = { corColetor3 = it },
 
-
-            onR4Change = { rValue4 = it},
-            onG4Change = { gValue4 = it},
-            onB4Change = { bValue4 = it},
+                onR4Change = { rValue4 = it},
+                onG4Change = { gValue4 = it},
+                onB4Change = { bValue4 = it},
                 onCorColetor4Change = { corColetor4 = it },
 
+                onR5Change = { rValue5 = it},
+                onG5Change = { gValue5 = it},
+                onB5Change = { bValue5 = it},
+                onCorColetor5Change = { corColetor5 = it },
 
-            onR5Change = { rValue5 = it},
-            onG5Change = { gValue5 = it},
-            onB5Change = { bValue5 = it},
-            onCorColetor5Change = { corColetor5 = it },
-
-            onR6Change = { rValue6 = it},
-            onG6Change = { gValue6 = it},
-            onB6Change = { bValue6 = it},
-            onCorColetor6Change= { corColetor6 = it },
+                onR6Change = { rValue6 = it},
+                onG6Change = { gValue6 = it},
+                onB6Change = { bValue6 = it},
+                onCorColetor6Change= { corColetor6 = it },
 
                 onR7Change = { rValue7 = it},
                 onG7Change = { gValue7 = it},
@@ -437,7 +424,6 @@ fun AngleCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RGBCard(
     label: String,
@@ -485,12 +471,10 @@ fun RGBCard(
     onB3Change: (String) -> Unit,
     onCorColetor3Change: (String) -> Unit,
 
-
     onR4Change: (String) -> Unit,
     onG4Change: (String) -> Unit,
     onB4Change: (String) -> Unit,
     onCorColetor4Change: (String) -> Unit,
-
 
     onR5Change: (String) -> Unit,
     onG5Change: (String) -> Unit,
@@ -507,11 +491,6 @@ fun RGBCard(
     onB7Change: (String) -> Unit,
     onCorColetor7Change: (String) -> Unit
 ) {
-  //  var expanded by rememberSaveable { mutableStateOf(false) }
-   // var selectedColor by rememberSaveable { mutableStateOf(cor) }
-
-    //val colorOptions = listOf("Vermelho", "Verde", "Azul", "Amarelo", "Roxo")
-
     ColorSortingControllerTheme {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -584,7 +563,7 @@ fun RGBCard(
                     Text(text = "G: ")
                     InputField2(value = GCor3, onValueChange = onG3Change)
                     Text(text = "B: ")
-                    InputField(value = BCor3, onValueChange = onB3Change)
+                    InputField2(value = BCor3, onValueChange = onB3Change)
                 }
 
                 Row(
@@ -668,9 +647,6 @@ fun RGBCard(
                     Text(text = "B: ")
                     InputField2(value = BCor7, onValueChange = onB7Change)
                 }
-
-
-
             }
         }
     }

@@ -11,7 +11,8 @@ import com.example.colorsortingcontroller.data.entities.Estatisticas
 import com.example.colorsortingcontroller.data.entities.Monitoramento
 import com.example.colorsortingcontroller.data.entities.Parametros
 
-@Database(entities = [Monitoramento::class, Parametros::class, Estatisticas::class], version = 5, exportSchema = false)
+@Database(entities = [Monitoramento::class, Parametros::class, Estatisticas::class],
+    version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun parametrosDao(): ParametrosDao
@@ -28,7 +29,6 @@ abstract class AppDatabase : RoomDatabase() {
         ): AppDatabase {
 
             return Instance ?: synchronized(this) {
-
                 val instance = Room.databaseBuilder(
                     context,
                     AppDatabase::class.java,

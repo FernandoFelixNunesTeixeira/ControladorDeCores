@@ -28,7 +28,7 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     private val _state = MutableStateFlow(ScreenState.estatisticas)
     val state: StateFlow<ScreenState> = _state
 
-    //variável para controlar insert e updates no banco de dados
+    // Variável para controlar insert e updates no banco de dados
     private var valorEstatisticasList : MutableStateFlow<Int>? = null
 
     init {
@@ -55,7 +55,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         pecasCor5: Int,
         pecasCor6: Int,
         pecasCor7: Int,
-
 
         pecasColetor1: Int,
         pecasColetor2: Int,
@@ -125,19 +124,11 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
-
-
-
-
     fun getConexao() {
         viewModelScope.launch {
             try {
-
                 mqttHandler = MQTTHandler.getInstance()
                 mqttHandler.connect(BROKER_URL, CLIENT_ID)
-
-
-
             } catch (e: Throwable) {
                 e.printStackTrace()
             }
@@ -161,7 +152,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     val mensagemMQTT: LiveData<String> get() = mqttHandler.mqttStateEstatisticas
     val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
 
-    var tempoEspera = System.currentTimeMillis()
     fun manipularMensagemMQTT() {
         viewModelScope.launch {
                 try {
@@ -217,7 +207,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                                 )
                             }
                         }
-
                     }
                 } catch(e: Throwable){
                     e.printStackTrace()
@@ -242,12 +231,8 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
     fun publishMessage(topic: String, message: String, nivelQos: Int, retainedFlag: Boolean) {
         viewModelScope.launch{
             try {
-                //  Colocar Toast indicando que mensagem foi enviada na view
+                // Toast indicando que mensagem foi enviada na view
                 mqttHandler.publish(topic, message, nivelQos, retainedFlag)
-
-
-
-
             } catch(e: Exception) {
                 e.printStackTrace()
             }
@@ -263,7 +248,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
             } catch(e: Throwable) {
                 e.printStackTrace()
             }
-
         }
     }
 
@@ -280,7 +264,6 @@ class EstatisticasViewModel(private val estatisticasRepository: EstatisticasRepo
                         pecasCor5 = estatisticasList[0].pecasCor5,
                         pecasCor6 = estatisticasList[0].pecasCor6,
                         pecasCor7 = estatisticasList[0].pecasCor7,
-
 
                         pecasColetor1 = estatisticasList[0].pecasColetor1,
                         pecasColetor2 = estatisticasList[0].pecasColetor2,

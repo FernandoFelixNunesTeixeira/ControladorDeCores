@@ -1,6 +1,8 @@
 package com.example.colorsortingcontroller.model
 
-data class Datos (
+// Dados para os gráficos
+
+data class Dados (
     var label: String,
     var value: Int
 )

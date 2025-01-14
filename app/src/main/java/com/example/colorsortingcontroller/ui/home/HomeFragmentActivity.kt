@@ -25,9 +25,11 @@ class HomeFragmentActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Instanciação do firebaseAuth e ViewModel HomeScreen através da factory
         auth = FirebaseAuth.getInstance()
         viewModel = ViewModelProvider(this, HomeViewModelFactory(auth)).get(HomeViewModel::class.java)
 
+        // Tela inicial de loading
         setContent {
             ColorSortingControllerTheme {
                 LoadingScreen(isLoading = true)
@@ -37,13 +39,10 @@ class HomeFragmentActivity : FragmentActivity() {
         Handler(Looper.getMainLooper()).postDelayed(Runnable {
             setContent {
                 ColorSortingControllerTheme {
-                    HomeScreen(viewModel = viewModel)
+                    HomeScreen(viewModel = viewModel) // Criação da tela de login
                 }
             }
         }, 3000)
-
-                viewModel.inicializarBiometria(this)
+        viewModel.inicializarBiometria(this) // Chama função biometria
     }
-
-
 }

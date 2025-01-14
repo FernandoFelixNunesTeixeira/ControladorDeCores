@@ -11,6 +11,8 @@ import com.example.colorsortingcontroller.parametros.ParametrosViewModel
 import com.example.colorsortingcontroller.ui.home.HomeViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+// Utilização de factory para a instanciação de ViewModels e injeção de dependências
+
 class HomeViewModelFactory(private val auth: FirebaseAuth) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {

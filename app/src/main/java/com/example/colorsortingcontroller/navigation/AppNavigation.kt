@@ -25,26 +25,25 @@ fun AppNavigation(
 
     // Troca a tela com base na tela atual
     when (currentScreen) {
-
         ScreenState.monitoramento -> ScaffoldApp(
             state = monitoramentoViewModel.state.collectAsState().value,
             onScreenChange = { currentScreen = it }
         ) {
-            MonitoramentoScreen()
+            MonitoramentoScreen() // Chama tela composable Monitoramento
         }
 
         ScreenState.parametros -> ScaffoldApp(
             state = parametrosViewModel.state.collectAsState().value,
             onScreenChange = { currentScreen = it }
         ) {
-            ParametrosScreen()
+            ParametrosScreen() // Chama tela composable Parametros
         }
 
         ScreenState.estatisticas -> ScaffoldApp(
             state = estatisticasViewModel.state.collectAsState().value,
             onScreenChange = { currentScreen = it }
         ) {
-            EstatisticasScreen()
+            EstatisticasScreen() // Chama tela composable Estatisticas
         }
     }
 }

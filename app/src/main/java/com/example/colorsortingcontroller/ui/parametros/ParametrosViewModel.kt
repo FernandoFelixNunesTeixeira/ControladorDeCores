@@ -46,7 +46,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
         manipularMensagemMQTT()
     }
 
-
     fun getConexao() {
         viewModelScope.launch{
             try {
@@ -93,7 +92,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
 
         }
     }
-
 
     fun transformarObjetoJsoneEnviar(posicaoServoPortaMin: String,
                                      posicaoServoPortaMax: String,
@@ -215,29 +213,16 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
     private val _stateParametros = MutableStateFlow(ParametrosUiState())
     val stateParametros: StateFlow<ParametrosUiState> = _stateParametros
 
-
-
     val mensagemMQTT: LiveData<String?> get() = mqttHandler.mqttStateParametros
     val conexaoMQTT: LiveData<String> get() = mqttHandler.mqttState
     val mensagemEntregue: LiveData<String> get() = mqttHandler.mqttStateEntregaMensagem
 
      fun manipularMensagemMQTT(){
          viewModelScope.launch {
-
-
-
-
              try {
-
                  //Conversão da mensagem em MQTT contendo uma string json para um objeto json
                  mensagemMQTT.observeForever { novaMensagem ->
-
-
-
-
                      if (novaMensagem != null) {
-
-
                          val objetoJson =
                              JsonParser.parseString(novaMensagem).asJsonObject
 
@@ -280,7 +265,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                              objetoJson.get("Cor7Coletor").asInt
                          )
 
-
                          if (valorParametrosList != null) {
                              update(
                                  _stateParametros.value.posicaoServoPortaMin,
@@ -320,7 +304,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                                  _stateParametros.value.BCor7,
                                  _stateParametros.value.coletorCor7
                              )
-
                          } else {
                              insert(
                                  _stateParametros.value.posicaoServoPortaMin,
@@ -362,18 +345,12 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                              )
                          }
                      }
-
                  }
              } catch (e: Throwable){
                  e.printStackTrace()
              }
          }
-
     }
-
-    // Recebe todos os valores do repositório
-   val allParametros: Flow<List<Parametros>> = parametrosRepository.allParametros
-
 
     // Envia a lista de parametros para a UI
     val parametros = parametrosRepository.allParametros.map { list ->
@@ -459,13 +436,9 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                     RCor6.toFloat(), GCor6.toFloat(), BCor6.toFloat(),
                     coletorCor6.toInt(), RCor7.toFloat(), GCor7.toFloat(), BCor7.toFloat(),
                     coletorCor7.toInt()
-
                 )
             }
-
         }
-
-
     }
 
     // Função da ViewModel para atualizar os dados
@@ -506,7 +479,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
         GCor7: Float,
         BCor7: Float,
         coletorCor7: Int
-
     ) = viewModelScope.launch {
         withContext(Dispatchers.IO)
         {
@@ -563,9 +535,7 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                 posicaoServoDirecionador34Min = posicaoServoDirecionador34Min,
                 posicaoServoDirecionador34Max = posicaoServoDirecionador34Max
             )
-
         }
-
     }
 
     fun delete(id: Int)= viewModelScope.launch {
@@ -670,11 +640,6 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
         var GCor7: Float = 0.toFloat(),
         var BCor7: Float = 0.toFloat(),
         var coletorCor7: Int = 0
-       // var cor: String = "vermelho",
-
-      //  var rValue: Int = 0,
-       // var gValue: Int = 0,
-       // var bValue: Int = 0
     )
 
     fun updateParametrosFromDatabase() {
@@ -725,82 +690,94 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                     valorParametrosList = MutableStateFlow(1)
                     delay(300)
                 }
-
             }
         }
     }
 
 
-     fun validateInput(posicaoServoPortaMin: String,
-                              posicaoServoPortaMax: String,
-                              posicaoServoDirecionadorEDMin: String,
-                              posicaoServoDirecionadorEDMax: String,
-                              posicaoServoDirecionador12Min: String,
-                              posicaoServoDirecionador12Max: String,
-                              posicaoServoDirecionador34Min: String,
-                              posicaoServoDirecionador34Max: String,
-                       RCor1: String,
-                       GCor1: String,
-                       BCor1: String,
-                       coletorCor1: String,
-                       RCor2: String,
-                       GCor2: String,
-                       BCor2: String,
-                       coletorCor2: String,
-                       RCor3: String,
-                       GCor3: String,
-                       BCor3: String,
-                       coletorCor3: String,
-                       RCor4: String,
-                       GCor4: String,
-                       BCor4: String,
-                       coletorCor4: String,
-                       RCor5: String,
-                       GCor5: String,
-                       BCor5: String ,
-                       coletorCor5: String,
-                       RCor6: String,
-                       GCor6: String,
-                       BCor6: String,
-                       coletorCor6: String,
-                       RCor7: String,
-                       GCor7: String,
-                       BCor7: String,
-                       coletorCor7: String): Boolean {
-        return (posicaoServoPortaMin.isNotBlank() && posicaoServoPortaMax.isNotBlank() &&
-                posicaoServoDirecionadorEDMin.isNotBlank()
-               && posicaoServoDirecionadorEDMax.isNotBlank()
-                &&  posicaoServoDirecionador12Min.isNotBlank() && posicaoServoDirecionador12Max.isNotBlank()
-                && posicaoServoDirecionador34Min.isNotBlank() && posicaoServoDirecionador34Max.isNotBlank()
-                // && cor.isNotBlank() //Cor não tem como ser vazia, já que estáa em uma caixa de seleção
-                && RCor1.isNotBlank() && GCor1.isNotBlank() && BCor1.isNotBlank() && coletorCor1.isNotBlank()
-                && RCor2.isNotBlank() && GCor2.isNotBlank() && BCor2.isNotBlank() && coletorCor2.isNotBlank()
-                && RCor3.isNotBlank() && GCor3.isNotBlank() && BCor3.isNotBlank() && coletorCor3.isNotBlank()
-                && RCor4.isNotBlank() && GCor4.isNotBlank() && BCor4.isNotBlank() && coletorCor4.isNotBlank()
-                && RCor5.isNotBlank() && GCor5.isNotBlank() && BCor5.isNotBlank() && coletorCor5.isNotBlank()
-                && RCor6.isNotBlank() && GCor6.isNotBlank() && BCor6.isNotBlank() && coletorCor6.isNotBlank()
-                && RCor7.isNotBlank() && GCor7.isNotBlank() && BCor7.isNotBlank() && coletorCor7.isNotBlank()
-                && RCor1.toFloat() <= 1 && GCor1.toFloat() <= 1 && BCor1.toFloat() <= 1 && coletorCor1.toInt() <= 4 && coletorCor1.toInt() != 0
-                && RCor2.toFloat() <= 1 && GCor2.toFloat() <= 1 && BCor2.toFloat() <= 1 && coletorCor2.toInt() <= 4 && coletorCor2.toInt() != 0
-                && RCor3.toFloat() <= 1 && GCor3.toFloat() <= 1 && BCor3.toFloat() <= 1 && coletorCor3.toInt() <= 4 && coletorCor3.toInt() != 0
-                && RCor4.toFloat() <= 1 && GCor4.toFloat() <= 1 && BCor4.toFloat() <= 1 && coletorCor4.toInt() <= 4 && coletorCor4.toInt() != 0
-                && RCor5.toFloat() <= 1 && GCor5.toFloat() <= 1 && BCor5.toFloat() <= 1 && coletorCor5.toInt() <= 4 && coletorCor5.toInt() != 0
-                && RCor6.toFloat() <= 1 && GCor6.toFloat() <= 1 && BCor6.toFloat() <= 1 && coletorCor6.toInt() <= 4 && coletorCor6.toInt() != 0
-                && RCor7.toFloat() <= 1 && GCor7.toFloat() <= 1 && BCor7.toFloat() <= 1 && coletorCor7.toInt() <= 4 && coletorCor7.toInt() != 0
-                && posicaoServoPortaMax.toInt() <= 180
-                && posicaoServoDirecionadorEDMax.toInt() <= 180
-                && posicaoServoDirecionador12Max.toInt() <= 180
-                && posicaoServoDirecionador34Max.toInt() <= 180
-                )
+     fun validateInput(
+         posicaoServoPortaMin: String,
+         posicaoServoPortaMax: String,
+         posicaoServoDirecionadorEDMin: String,
+         posicaoServoDirecionadorEDMax: String,
+         posicaoServoDirecionador12Min: String,
+         posicaoServoDirecionador12Max: String,
+         posicaoServoDirecionador34Min: String,
+         posicaoServoDirecionador34Max: String,
+         RCor1: String,
+         GCor1: String,
+         BCor1: String,
+         coletorCor1: String,
+         RCor2: String,
+         GCor2: String,
+         BCor2: String,
+         coletorCor2: String,
+         RCor3: String,
+         GCor3: String,
+         BCor3: String,
+         coletorCor3: String,
+         RCor4: String,
+         GCor4: String,
+         BCor4: String,
+         coletorCor4: String,
+         RCor5: String,
+         GCor5: String,
+         BCor5: String ,
+         coletorCor5: String,
+         RCor6: String,
+         GCor6: String,
+         BCor6: String,
+         coletorCor6: String,
+         RCor7: String,
+         GCor7: String,
+         BCor7: String,
+         coletorCor7: String): Boolean {
+         return (
+                 // Campos não podem ser nulos
+                 posicaoServoPortaMin.isNotBlank()
+                 && posicaoServoPortaMax.isNotBlank()
+                 && posicaoServoDirecionadorEDMin.isNotBlank()
+                 && posicaoServoDirecionadorEDMax.isNotBlank()
+                 && posicaoServoDirecionador12Min.isNotBlank()
+                 && posicaoServoDirecionador12Max.isNotBlank()
+                 && RCor1.isNotBlank() && GCor1.isNotBlank() && BCor1.isNotBlank() && coletorCor1.isNotBlank()
+                 && RCor2.isNotBlank() && GCor2.isNotBlank() && BCor2.isNotBlank() && coletorCor2.isNotBlank()
+                 && RCor3.isNotBlank() && GCor3.isNotBlank() && BCor3.isNotBlank() && coletorCor3.isNotBlank()
+                 && RCor4.isNotBlank() && GCor4.isNotBlank() && BCor4.isNotBlank() && coletorCor4.isNotBlank()
+                 && RCor5.isNotBlank() && GCor5.isNotBlank() && BCor5.isNotBlank() && coletorCor5.isNotBlank()
+                 && RCor6.isNotBlank() && GCor6.isNotBlank() && BCor6.isNotBlank() && coletorCor6.isNotBlank()
+                 && RCor7.isNotBlank() && GCor7.isNotBlank() && BCor7.isNotBlank() && coletorCor7.isNotBlank()
+
+                 // Intervalo RGB entre 0 e 1
+                 && RCor1.toFloat() <= 1 && GCor1.toFloat() <= 1 && BCor1.toFloat() <= 1 && coletorCor1.toInt() <= 4 && coletorCor1.toInt() != 0
+                 && RCor2.toFloat() <= 1 && GCor2.toFloat() <= 1 && BCor2.toFloat() <= 1 && coletorCor2.toInt() <= 4 && coletorCor2.toInt() != 0
+                 && RCor3.toFloat() <= 1 && GCor3.toFloat() <= 1 && BCor3.toFloat() <= 1 && coletorCor3.toInt() <= 4 && coletorCor3.toInt() != 0
+                 && RCor4.toFloat() <= 1 && GCor4.toFloat() <= 1 && BCor4.toFloat() <= 1 && coletorCor4.toInt() <= 4 && coletorCor4.toInt() != 0
+                 && RCor5.toFloat() <= 1 && GCor5.toFloat() <= 1 && BCor5.toFloat() <= 1 && coletorCor5.toInt() <= 4 && coletorCor5.toInt() != 0
+                 && RCor6.toFloat() <= 1 && GCor6.toFloat() <= 1 && BCor6.toFloat() <= 1 && coletorCor6.toInt() <= 4 && coletorCor6.toInt() != 0
+                 && RCor7.toFloat() <= 1 && GCor7.toFloat() <= 1 && BCor7.toFloat() <= 1 && coletorCor7.toInt() <= 4 && coletorCor7.toInt() != 0
+
+                 // Intervalo do ângulo das portas
+                 && posicaoServoPortaMin.toInt() >= 0 && posicaoServoPortaMin.toInt() <= 90
+                 && posicaoServoDirecionadorEDMin.toInt() >= 70 && posicaoServoDirecionadorEDMin.toInt() <= 110
+                 && posicaoServoDirecionador12Min.toInt() >= 70 && posicaoServoDirecionador12Min.toInt() <= 110
+                 && posicaoServoDirecionador34Min.toInt() >= 80 && posicaoServoDirecionador34Min.toInt() <= 120
+                 && posicaoServoPortaMax.toInt() >= 0 && posicaoServoPortaMax.toInt() <= 90
+                 && posicaoServoDirecionadorEDMax.toInt() >= 70 && posicaoServoDirecionadorEDMax.toInt() <= 110
+                 && posicaoServoDirecionador12Max.toInt() >= 70 && posicaoServoDirecionador12Max.toInt() <= 110
+                 && posicaoServoDirecionador34Max.toInt() >= 80 && posicaoServoDirecionador34Max.toInt() <= 120
+
+                 // Angulo máximo deve ser sempre maior que o ângulo mínimo
+                 && posicaoServoPortaMin.toInt() < posicaoServoPortaMax.toInt()
+                 && posicaoServoDirecionadorEDMin.toInt() < posicaoServoDirecionadorEDMax.toInt()
+                 && posicaoServoDirecionador12Min.toInt() < posicaoServoDirecionador12Max.toInt()
+                 && posicaoServoDirecionador34Min.toInt() < posicaoServoDirecionador34Max.toInt()
+            )
         }
-
-
-
 
     override fun onCleared(){
         super.onCleared()
         //Encerrar a conexão
         mqttHandler.disconnect()
     }
-
-    }
+}
