@@ -740,6 +740,8 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                  && posicaoServoDirecionadorEDMax.isNotBlank()
                  && posicaoServoDirecionador12Min.isNotBlank()
                  && posicaoServoDirecionador12Max.isNotBlank()
+                 && posicaoServoDirecionador34Min.isNotBlank()
+                 && posicaoServoDirecionador34Max.isNotBlank()
                  && RCor1.isNotBlank() && GCor1.isNotBlank() && BCor1.isNotBlank() && coletorCor1.isNotBlank()
                  && RCor2.isNotBlank() && GCor2.isNotBlank() && BCor2.isNotBlank() && coletorCor2.isNotBlank()
                  && RCor3.isNotBlank() && GCor3.isNotBlank() && BCor3.isNotBlank() && coletorCor3.isNotBlank()
@@ -767,11 +769,11 @@ class ParametrosViewModel(private val parametrosRepository: ParametrosRepository
                  && posicaoServoDirecionador12Max.toInt() >= 70 && posicaoServoDirecionador12Max.toInt() <= 110
                  && posicaoServoDirecionador34Max.toInt() >= 80 && posicaoServoDirecionador34Max.toInt() <= 120
 
-                 // Angulo máximo deve ser sempre maior que o ângulo mínimo
-                 && posicaoServoPortaMin.toInt() < posicaoServoPortaMax.toInt()
-                 && posicaoServoDirecionadorEDMin.toInt() < posicaoServoDirecionadorEDMax.toInt()
-                 && posicaoServoDirecionador12Min.toInt() < posicaoServoDirecionador12Max.toInt()
-                 && posicaoServoDirecionador34Min.toInt() < posicaoServoDirecionador34Max.toInt()
+                 // Angulo máximo e mínimo devem ser diferentes
+                 && posicaoServoPortaMin.toInt() != posicaoServoPortaMax.toInt()
+                 && posicaoServoDirecionadorEDMin.toInt() != posicaoServoDirecionadorEDMax.toInt()
+                 && posicaoServoDirecionador12Min.toInt() != posicaoServoDirecionador12Max.toInt()
+                 && posicaoServoDirecionador34Min.toInt() != posicaoServoDirecionador34Max.toInt()
             )
         }
 
